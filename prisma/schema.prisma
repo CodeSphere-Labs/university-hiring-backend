@@ -1,0 +1,167 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  
+  email    String @unique
+  password_hash String
+  role     Role
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  Student Student[]
+
+  Company Company[]
+
+  AdminPanel AdminPanel[]
+
+  Notifications Notifications[]
+}
+
+model University{
+  id Int @id @default(autoincrement())
+
+  name String
+  adress String
+  contact String
+  email String @unique
+  phone String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+
+  Student Student[]
+
+  AdminPanel AdminPanel[]
+}
+
+model Student{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [user_id], references: [id])
+  university University @relation(fields: [university_id], references: [id])
+  user_id Int 
+  university_id Int
+
+  description String
+  course Int
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+
+  StudentSkills StudentSkills[]
+}
+
+model Company{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [user_id], references: [id])
+  user_id Int
+
+  name String
+  industry String
+  adress String
+  contact String
+  email String @unique
+  phone String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  Intership Intership[]
+
+  AdminPanel AdminPanel[]
+}
+
+model Intership{
+  id Int @id @default(autoincrement())
+  company Company @relation(fields: [company_id], references: [id])
+  company_id Int
+
+  title String
+  description String
+  requirements String
+  location String
+  
+  start_date DateTime
+  end_time DateTime
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Skills {
+  id Int @id @default(autoincrement())
+
+  name String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  StudentSkills StudentSkills[]
+}
+
+model StudentSkills{
+  id Int @id @default(autoincrement())
+  student Student @relation(fields: [student_id], references: [id])
+  skill Skills @relation(fields: [skill_id], references: [id])
+  student_id Int
+  skill_id Int
+
+  level Level
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model AdminPanel{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [user_id], references: [id])
+  university University? @relation(fields: [university_id], references: [id])
+  company Company? @relation(fields: [company_id],references: [id])
+  user_id Int
+  university_id Int?
+  company_id Int?
+
+  role Role
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Notifications{
+  id Int @id @default(autoincrement())
+  user User @relation(fields: [user_id], references: [id])
+  user_id Int
+
+  message String
+
+  role Role
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+}
+
+
+enum Role {
+  student
+  university
+  company
+  admin
+}
+
+enum Level {
+  beginner
+  intermediate
+  advanced
+}

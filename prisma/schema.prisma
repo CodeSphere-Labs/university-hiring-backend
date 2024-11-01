@@ -31,7 +31,7 @@ model University{
   id Int @id @default(autoincrement())
 
   name String
-  adress String
+  address String
   contact String
   email String @unique
   phone String
@@ -77,12 +77,12 @@ model Company{
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  Intership Intership[]
+  Intership Internship[]
 
   AdminPanel AdminPanel[]
 }
 
-model Intership{
+model Internship{
   id Int @id @default(autoincrement())
   company Company @relation(fields: [company_id], references: [id])
   company_id Int

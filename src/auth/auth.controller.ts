@@ -16,9 +16,9 @@ import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 import type { Response } from 'express';
 import { ResponseSignUpDto } from './dto/responseSignUp.dto';
-import { TransformDataInterceptor } from 'common/transform.data';
-import { AccessTokenGuard } from 'common/guards/accessToken.guard';
 import { SignInDto } from './dto/signin.dto';
+import { TransformDataInterceptor } from 'src/common/transform.data';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
 @ApiTags('Auth')
 @Controller('auth')

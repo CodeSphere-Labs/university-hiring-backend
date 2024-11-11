@@ -3,9 +3,9 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 
 import { JwtModule } from '@nestjs/jwt';
-import { PrismaService } from 'database/prisma.service';
-import { AccessTokenStrategy } from './strategies/accessToken.strategy';
-import { RefreshTokenStrategy } from './strategies/refreshToken.strategy';
+import { PrismaService } from 'src/database/prisma.service';
+import { RefreshTokenStrategy } from 'src/auth/strategies/refreshToken.strategy';
+import { AccessTokenStrategy } from 'src/auth/strategies/accessToken.strategy';
 
 @Module({
   imports: [

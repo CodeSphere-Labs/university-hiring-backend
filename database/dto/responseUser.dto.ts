@@ -2,7 +2,7 @@ import { Exclude, Expose } from '@nestjs/class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Exclude()
-export class ResponseSignUpDto {
+export class ResponseUserDto {
   @Expose()
   @ApiProperty()
   id: number;
@@ -17,9 +17,13 @@ export class ResponseSignUpDto {
 
   @Expose()
   @ApiProperty()
+  patronymic: string;
+
+  @Expose()
+  @ApiProperty()
   email: string;
 
   @Expose()
   @ApiProperty()
-  accessToken: string;
+  role: string;
 }

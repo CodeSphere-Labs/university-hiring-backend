@@ -8,11 +8,11 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as process from 'node:process';
 
-import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { ResponseUserDto } from 'database/dto/responseUser.dto';
 import { SignInDto } from './dto/signin.dto';
 import { PrismaService } from 'database/prisma.service';
 import { saltRounds } from 'common/constants';
+import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 @Injectable()
 export class AuthService {
@@ -43,7 +43,7 @@ export class AuthService {
 
     if (
       !user ||
-      !(await bcrypt.compare(signInDto.hashPassword, user.password))
+      !(await bcrypt.compare(signInDto.hashPassword, user.passwordHash))
     ) {
       throw new UnauthorizedException('Invalid email or password');
     }

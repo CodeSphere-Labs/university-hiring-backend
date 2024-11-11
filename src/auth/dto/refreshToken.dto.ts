@@ -1,11 +1,11 @@
-import { IsNotEmpty, IsString } from '@nestjs/class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RefreshTokenDto {
   @IsNotEmpty()
-  @IsString()
+  @IsNumber()
   @ApiProperty()
-  userId: string;
+  userId: number;
 
   @IsNotEmpty()
   @IsString()

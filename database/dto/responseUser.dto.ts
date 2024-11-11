@@ -9,15 +9,15 @@ export class ResponseUserDto {
 
   @Expose()
   @ApiProperty()
-  first_name: string;
+  first_name?: string;
 
   @Expose()
   @ApiProperty()
-  last_name: string;
+  last_name?: string;
 
   @Expose()
   @ApiProperty()
-  patronymic: string;
+  patronymic?: string;
 
   @Expose()
   @ApiProperty()

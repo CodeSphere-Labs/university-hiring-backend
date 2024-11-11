@@ -9,11 +9,11 @@ export class ResponseSignUpDto {
 
   @Expose()
   @ApiProperty()
-  first_name: string;
+  first_name?: string;
 
   @Expose()
   @ApiProperty()
-  last_name: string;
+  last_name?: string;
 
   @Expose()
   @ApiProperty()

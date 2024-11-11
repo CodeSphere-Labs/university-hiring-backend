@@ -11,10 +11,8 @@ model Organization {
   id          Int       @id @default(autoincrement())
   name        String
   type        OrganizationType
-  address     String
-  contact     String
   email       String    @unique
-  phone       String
+  logoUrl     String?
 
   users       User[]
   invitations Invitation[]
@@ -27,12 +25,16 @@ model User {
   id              Int       @id @default(autoincrement())
   email           String    @unique
   passwordHash    String
+  avatarUrl       String?
   role            Role
   organization    Organization? @relation(fields: [organizationId], references: [id])
   organizationId  Int?
 
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  refreshToken   String?
+  studentProfile StudentProfile? @relation
 }
 
 model Invitation {
@@ -48,6 +50,20 @@ model Invitation {
 
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+}
+
+model StudentProfile {
+  id            Int       @id @default(autoincrement())
+  userId        Int       @unique
+  resume        String?
+  aboutMe       String?
+  githubLink    String?
+  projects      Json?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id])
 }
 
 enum OrganizationType {

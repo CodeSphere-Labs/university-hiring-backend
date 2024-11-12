@@ -20,9 +20,7 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(
-    user: any,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async signUp(user: any) {
     const tokens = await this.generateAndStoreTokens(
       user.id,
       user.email,
@@ -31,11 +29,7 @@ export class AuthService {
     return tokens;
   }
 
-  async signIn(signInDto: SignInDto): Promise<{
-    accessToken: string;
-    refreshToken: string;
-    user: any;
-  }> {
+  async signIn(signInDto: SignInDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: signInDto.email },
     });
@@ -55,7 +49,7 @@ export class AuthService {
     return { ...tokens, user };
   }
 
-  async logout(userId: number): Promise<{ message: string }> {
+  async logout(userId: number) {
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken: null },
@@ -63,9 +57,7 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
-  async refreshToken(
-    refreshTokenDto: RefreshTokenDto,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(refreshTokenDto: RefreshTokenDto) {
     const user = await this.prisma.user.findUnique({
       where: { id: refreshTokenDto.userId },
     });
@@ -98,17 +90,13 @@ export class AuthService {
     userId: number,
     email: string,
     role: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  ) {
     const tokens = await this.getTokens(userId, email, role);
     await this.updateRefreshToken(userId, tokens.refreshToken);
     return tokens;
   }
 
-  private async getTokens(
-    userId: number,
-    email: string,
-    role: string,
-  ): Promise<{ accessToken: string; refreshToken: string }> {
+  private async getTokens(userId: number, email: string, role: string) {
     const accessToken = await this.jwtService.signAsync(
       { sub: userId, email, role },
       { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '15m' },
@@ -122,10 +110,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  private async updateRefreshToken(
-    userId: number,
-    refreshToken: string,
-  ): Promise<void> {
+  private async updateRefreshToken(userId: number, refreshToken: string) {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, saltRounds);
     await this.prisma.user.update({
       where: { id: userId },
@@ -133,7 +118,7 @@ export class AuthService {
     });
   }
 
-  private verifyToken(token: string, secret: string): boolean {
+  private verifyToken(token: string, secret: string) {
     try {
       this.jwtService.verify(token, { secret });
       return true;

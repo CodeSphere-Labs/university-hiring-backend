@@ -1,8 +1,4 @@
-import { ApiSuccessResponseDto } from 'utils/dto/response.dto';
-
-export const generateSuccessResponse = (
-  message: string = 'Success',
-): ApiSuccessResponseDto => ({
+export const generateSuccessResponse = (message: string = 'Success') => ({
   statusCode: 200,
   message,
 });

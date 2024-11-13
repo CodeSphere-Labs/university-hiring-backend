@@ -12,6 +12,7 @@ import { SignInDto } from './dto/signin.dto';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { saltRounds } from 'src/common/constants';
+import type { Response } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -34,10 +35,12 @@ export class AuthService {
       where: { email: signInDto.email },
     });
 
-    if (
-      !user ||
-      !(await bcrypt.compare(signInDto.hashPassword, user.passwordHash))
-    ) {
+    const isPasswordValid = await bcrypt.compare(
+      signInDto.password,
+      user.passwordHash,
+    );
+
+    if (!user || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
     }
 
@@ -46,7 +49,7 @@ export class AuthService {
       user.email,
       user.role,
     );
-    return { ...tokens, user };
+    return { user, ...tokens };
   }
 
   async logout(userId: number) {
@@ -62,19 +65,21 @@ export class AuthService {
       where: { id: refreshTokenDto.userId },
     });
 
-    if (
-      !user ||
-      !(await bcrypt.compare(refreshTokenDto.refreshToken, user.refreshToken))
-    ) {
+    const isHashTokenValid = await bcrypt.compare(
+      refreshTokenDto.refreshToken,
+      user.refreshToken,
+    );
+
+    if (!user || !isHashTokenValid) {
       throw new ForbiddenException('Access Denied: Invalid refresh token');
     }
 
-    if (
-      !this.verifyToken(
-        refreshTokenDto.refreshToken,
-        process.env.JWT_REFRESH_SECRET,
-      )
-    ) {
+    const isRefreshTokenValid = this.verifyToken(
+      refreshTokenDto.refreshToken,
+      process.env.JWT_REFRESH_SECRET,
+    );
+
+    if (!isRefreshTokenValid) {
       throw new ForbiddenException('Invalid Refresh Token');
     }
 
@@ -112,6 +117,7 @@ export class AuthService {
 
   private async updateRefreshToken(userId: number, refreshToken: string) {
     const hashedRefreshToken = await bcrypt.hash(refreshToken, saltRounds);
+
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken: hashedRefreshToken },
@@ -125,5 +131,22 @@ export class AuthService {
     } catch (err) {
       return err;
     }
+  }
+
+  public setRefreshTokenCookie(
+    response: Response,
+    refreshToken: string,
+    accessToken: string,
+  ): void {
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === 'true',
+      sameSite: 'lax',
+    });
+    response.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === 'true',
+      sameSite: 'lax',
+    });
   }
 }

@@ -9,7 +9,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as process from 'node:process';
 
 import { SignInDto } from './dto/signin.dto';
-import { RefreshTokenDto } from './dto/refreshToken.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { saltRounds } from 'src/common/constants';
 import type { Response } from 'express';
@@ -60,27 +59,27 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
-  async refreshToken(refreshTokenDto: RefreshTokenDto) {
+  async refreshToken(refreshToken: string) {
+    const decodedRefreshToken = this.verifyToken(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET,
+    );
+
+    if (!decodedRefreshToken) {
+      throw new ForbiddenException('Invalid Refresh Token');
+    }
+
     const user = await this.prisma.user.findUnique({
-      where: { id: refreshTokenDto.userId },
+      where: { id: decodedRefreshToken['sub'] },
     });
 
     const isHashTokenValid = await bcrypt.compare(
-      refreshTokenDto.refreshToken,
+      refreshToken,
       user.refreshToken,
     );
 
     if (!user || !isHashTokenValid) {
       throw new ForbiddenException('Access Denied: Invalid refresh token');
-    }
-
-    const isRefreshTokenValid = this.verifyToken(
-      refreshTokenDto.refreshToken,
-      process.env.JWT_REFRESH_SECRET,
-    );
-
-    if (!isRefreshTokenValid) {
-      throw new ForbiddenException('Invalid Refresh Token');
     }
 
     const tokens = await this.generateAndStoreTokens(
@@ -126,10 +125,10 @@ export class AuthService {
 
   private verifyToken(token: string, secret: string) {
     try {
-      this.jwtService.verify(token, { secret });
-      return true;
+      return this.jwtService.verify(token, { secret });
     } catch (err) {
-      return err;
+      console.error(err);
+      return null;
     }
   }
 
@@ -143,6 +142,7 @@ export class AuthService {
       secure: process.env.COOKIE_SECURE === 'true',
       sameSite: 'lax',
     });
+
     response.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.COOKIE_SECURE === 'true',

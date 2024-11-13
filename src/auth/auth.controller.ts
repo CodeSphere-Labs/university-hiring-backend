@@ -4,12 +4,11 @@ import {
   Get,
   Param,
   Post,
+  Req,
   Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-
-import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 import type { Response } from 'express';
 import { SignInDto } from './dto/signin.dto';
@@ -40,12 +39,13 @@ export class AuthController {
     }
   }
 
-  @Post('refresh-token')
+  @Get('refresh-token')
   async refresh(
-    @Body() refreshTokenDto: RefreshTokenDto,
-  ): Promise<{ accessToken: string }> {
+    @Req() request: Request & { cookies: { refreshToken: string } },
+  ) {
+    const refreshToken = request.cookies['refreshToken'];
     try {
-      return await this.authService.refreshToken(refreshTokenDto);
+      return await this.authService.refreshToken(refreshToken);
     } catch (error) {
       throw error;
     }

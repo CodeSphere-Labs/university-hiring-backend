@@ -8,7 +8,6 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as process from 'node:process';
 
-import { ResponseUserDto } from 'utils/dto/responseUser.dto';
 import { SignInDto } from './dto/signin.dto';
 import { saltRounds } from 'src/common/constants';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
@@ -22,7 +21,7 @@ export class AuthService {
   ) {}
 
   async signUp(
-    user: ResponseUserDto,
+    user: any,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const tokens = await this.generateAndStoreTokens(
       user.id,
@@ -35,7 +34,7 @@ export class AuthService {
   async signIn(signInDto: SignInDto): Promise<{
     accessToken: string;
     refreshToken: string;
-    user: ResponseUserDto;
+    user: any;
   }> {
     const user = await this.prisma.user.findUnique({
       where: { email: signInDto.email },

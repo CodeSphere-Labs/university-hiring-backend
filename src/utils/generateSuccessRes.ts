@@ -1,4 +1,4 @@
-import { ApiSuccessResponseDto } from 'utils/dto/response.dto';
+import { ApiSuccessResponseDto } from './dto/response.dto';
 
 export const generateSuccessResponse = (
   message: string = 'Success',

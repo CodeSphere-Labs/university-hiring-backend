@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -137,8 +139,8 @@ export class AuthService {
     try {
       this.jwtService.verify(token, { secret });
       return true;
-    } catch (err) {
-      return err;
+    } catch {
+      throw new HttpException('cannot verify token', HttpStatus.BAD_REQUEST);
     }
   }
 }

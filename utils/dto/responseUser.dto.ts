@@ -9,18 +9,6 @@ export class ResponseUserDto {
 
   @Expose()
   @ApiProperty()
-  first_name?: string;
-
-  @Expose()
-  @ApiProperty()
-  last_name?: string;
-
-  @Expose()
-  @ApiProperty()
-  patronymic?: string;
-
-  @Expose()
-  @ApiProperty()
   email: string;
 
   @Expose()

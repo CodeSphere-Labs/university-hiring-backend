@@ -8,11 +8,11 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as process from 'node:process';
 
-import { ResponseUserDto } from 'database/dto/responseUser.dto';
+import { ResponseUserDto } from 'utils/dto/responseUser.dto';
 import { SignInDto } from './dto/signin.dto';
-import { PrismaService } from 'database/prisma.service';
-import { saltRounds } from 'common/constants';
+import { saltRounds } from 'src/common/constants';
 import { RefreshTokenDto } from './dto/refreshToken.dto';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class AuthService {

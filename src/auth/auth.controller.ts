@@ -4,6 +4,8 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Res,
@@ -16,9 +18,9 @@ import { RefreshTokenDto } from './dto/refreshToken.dto';
 
 import type { Response } from 'express';
 import { ResponseSignUpDto } from './dto/responseSignUp.dto';
-import { TransformDataInterceptor } from 'common/transform.data';
-import { AccessTokenGuard } from 'common/guards/accessToken.guard';
 import { SignInDto } from './dto/signin.dto';
+import { TransformDataInterceptor } from 'src/common/transform.data';
+import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -41,8 +43,8 @@ export class AuthController {
       this.setRefreshTokenCookie(response, refreshToken);
 
       return { ...user, accessToken };
-    } catch (error) {
-      throw error;
+    } catch {
+      throw new HttpException('user not found', HttpStatus.NOT_FOUND);
     }
   }
 
@@ -52,8 +54,11 @@ export class AuthController {
   ): Promise<{ accessToken: string }> {
     try {
       return await this.authService.refreshToken(refreshTokenDto);
-    } catch (error) {
-      throw error;
+    } catch {
+      throw new HttpException(
+        'cannot create refresh token',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -65,8 +70,8 @@ export class AuthController {
     try {
       await this.authService.logout(Number(id));
       return { success: true };
-    } catch (error) {
-      throw error;
+    } catch {
+      throw new HttpException('cannot logout now', HttpStatus.BAD_REQUEST);
     }
   }
 

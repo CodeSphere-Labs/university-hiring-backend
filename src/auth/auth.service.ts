@@ -7,11 +7,11 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import * as process from 'node:process';
+import type { Response } from 'express';
 
 import { SignInDto } from './dto/signin.dto';
-import { PrismaService } from 'src/database/prisma.service';
 import { saltRounds } from 'src/common/constants';
-import type { Response } from 'express';
+import { PrismaService } from 'src/database/prisma.service';
 
 @Injectable()
 export class AuthService {

@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   Post,
   Req,
@@ -34,8 +36,11 @@ export class AuthController {
       );
 
       return { ...user, accessToken };
-    } catch (error) {
-      throw error;
+    } catch {
+      throw new HttpException(
+        'Invalid email or password',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -46,8 +51,8 @@ export class AuthController {
     const refreshToken = request.cookies['refreshToken'];
     try {
       return await this.authService.refreshToken(refreshToken);
-    } catch (error) {
-      throw error;
+    } catch {
+      throw new HttpException('Invalid refresh token', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -59,8 +64,8 @@ export class AuthController {
     try {
       await this.authService.logout(Number(id));
       return { success: true };
-    } catch (error) {
-      throw error;
+    } catch {
+      throw new HttpException('Invalid refresh token', HttpStatus.BAD_REQUEST);
     }
   }
 }

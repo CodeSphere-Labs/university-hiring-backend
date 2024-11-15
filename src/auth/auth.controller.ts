@@ -1,33 +1,22 @@
-import { ApiTags } from '@nestjs/swagger';
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpException,
   HttpStatus,
   Param,
   Post,
+  Req,
   Res,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
-import { RefreshTokenDto } from './dto/refreshToken.dto';
-
 import type { Response } from 'express';
-import { ResponseSignUpDto } from './dto/responseSignUp.dto';
 import { SignInDto } from './dto/signin.dto';
-import { TransformDataInterceptor } from 'src/common/transform.data';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 
-@ApiTags('Auth')
 @Controller('auth')
-@UseInterceptors(
-  ClassSerializerInterceptor,
-  new TransformDataInterceptor(ResponseSignUpDto),
-)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -35,30 +24,35 @@ export class AuthController {
   async signIn(
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<ResponseSignUpDto> {
+  ) {
     try {
       const { accessToken, refreshToken, user } =
         await this.authService.signIn(signInDto);
 
-      this.setRefreshTokenCookie(response, refreshToken);
+      this.authService.setRefreshTokenCookie(
+        response,
+        refreshToken,
+        accessToken,
+      );
 
       return { ...user, accessToken };
     } catch {
-      throw new HttpException('user not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        'Invalid email or password',
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
-  @Post('refresh-token')
+  @Get('refresh-token')
   async refresh(
-    @Body() refreshTokenDto: RefreshTokenDto,
-  ): Promise<{ accessToken: string }> {
+    @Req() request: Request & { cookies: { refreshToken: string } },
+  ) {
+    const refreshToken = request.cookies['refreshToken'];
     try {
-      return await this.authService.refreshToken(refreshTokenDto);
+      return await this.authService.refreshToken(refreshToken);
     } catch {
-      throw new HttpException(
-        'cannot create refresh token',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Invalid refresh token', HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -71,15 +65,7 @@ export class AuthController {
       await this.authService.logout(Number(id));
       return { success: true };
     } catch {
-      throw new HttpException('cannot logout now', HttpStatus.BAD_REQUEST);
+      throw new HttpException('Invalid refresh token', HttpStatus.BAD_REQUEST);
     }
-  }
-
-  private setRefreshTokenCookie(response: Response, token: string): void {
-    response.cookie('refreshToken', token, {
-      httpOnly: true,
-      secure: process.env.COOKIE_SECURE === 'true',
-      sameSite: 'lax',
-    });
   }
 }

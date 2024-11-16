@@ -12,6 +12,8 @@ import type { Response } from 'express';
 import { SignInDto } from './dto/signin.dto';
 import { saltRounds } from 'src/common/constants';
 import { PrismaService } from 'src/database/prisma.service';
+import { SignUpDto } from 'src/auth/dto/signup.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -20,13 +22,30 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(user: any) {
+  async signUp(user: SignUpDto, role: Role, response: Response) {
+    const hashedPassword = await bcrypt.hash(user.password, saltRounds);
+
+    const createdUser = await this.prisma.user.create({
+      data: {
+        email: user.email,
+        passwordHash: hashedPassword,
+        role,
+      },
+    });
+
     const tokens = await this.generateAndStoreTokens(
-      user.id,
-      user.email,
-      user.role,
+      createdUser.id,
+      createdUser.email,
+      createdUser.role,
     );
-    return tokens;
+
+    this.setRefreshTokenCookie(
+      response,
+      tokens.refreshToken,
+      tokens.accessToken,
+    );
+
+    return createdUser;
   }
 
   async signIn(signInDto: SignInDto) {
@@ -87,7 +106,35 @@ export class AuthService {
       user.email,
       user.role,
     );
+
     return tokens;
+  }
+
+  public setRefreshTokenCookie(
+    response: Response,
+    refreshToken: string,
+    accessToken: string,
+  ): void {
+    response.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === 'true',
+      sameSite: 'lax',
+    });
+
+    response.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.COOKIE_SECURE === 'true',
+      sameSite: 'lax',
+    });
+  }
+
+  public verifyToken(token: string, secret: string) {
+    try {
+      return this.jwtService.verify(token, { secret });
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
   }
 
   private async generateAndStoreTokens(
@@ -97,6 +144,7 @@ export class AuthService {
   ) {
     const tokens = await this.getTokens(userId, email, role);
     await this.updateRefreshToken(userId, tokens.refreshToken);
+
     return tokens;
   }
 
@@ -120,33 +168,6 @@ export class AuthService {
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken: hashedRefreshToken },
-    });
-  }
-
-  private verifyToken(token: string, secret: string) {
-    try {
-      return this.jwtService.verify(token, { secret });
-    } catch (err) {
-      console.error(err);
-      return null;
-    }
-  }
-
-  public setRefreshTokenCookie(
-    response: Response,
-    refreshToken: string,
-    accessToken: string,
-  ): void {
-    response.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.COOKIE_SECURE === 'true',
-      sameSite: 'lax',
-    });
-
-    response.cookie('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.COOKIE_SECURE === 'true',
-      sameSite: 'lax',
     });
   }
 }

@@ -35,7 +35,7 @@ export class AuthController {
         accessToken,
       );
 
-      return { ...user, accessToken };
+      return user;
     } catch {
       throw new HttpException(
         'Invalid email or password',
@@ -47,10 +47,20 @@ export class AuthController {
   @Get('refresh-token')
   async refresh(
     @Req() request: Request & { cookies: { refreshToken: string } },
+    @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken = request.cookies['refreshToken'];
+    const refreshTokenRequest = request.cookies['refreshToken'];
     try {
-      return await this.authService.refreshToken(refreshToken);
+      const { refreshToken, accessToken } =
+        await this.authService.refreshToken(refreshTokenRequest);
+
+      this.authService.setRefreshTokenCookie(
+        response,
+        refreshToken,
+        accessToken,
+      );
+
+      return { status: 'Success' };
     } catch {
       throw new HttpException('Invalid refresh token', HttpStatus.BAD_REQUEST);
     }

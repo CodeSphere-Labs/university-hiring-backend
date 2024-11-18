@@ -6,12 +6,15 @@ import {
   Post,
   Query,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import { Roles } from 'src/common/guards/role.guard';
 import { InvitationService } from './invitation.service';
 import { CreateInvitationDto } from './dto/CreateInvitation.dto';
 import { ConfirmInvitationDto } from 'src/invitation/dto/ConfirmInvitation.dto';
 import type { Response } from 'express';
+import { ResponseUserDto } from 'src/common/baseDto/responseUser.dto';
+import { TransformDataInterceptor } from 'src/common/transform.data';
 
 @Controller('invitation')
 export class InvitationController {
@@ -24,6 +27,7 @@ export class InvitationController {
   }
 
   @Post('confirm-invitation')
+  @UseInterceptors(new TransformDataInterceptor(ResponseUserDto))
   async confirmRegisration(
     @Body() confirmInvitation: ConfirmInvitationDto,
     @Query('token') token: string,

@@ -9,18 +9,22 @@ import {
   Req,
   Res,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import type { Response } from 'express';
 import { SignInDto } from './dto/signin.dto';
 import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
+import { TransformDataInterceptor } from 'src/common/transform.data';
+import { ResponseUserDto } from 'src/common/baseDto/responseUser.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('sign-in')
+  @UseInterceptors(new TransformDataInterceptor(ResponseUserDto))
   async signIn(
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) response: Response,

@@ -14,6 +14,7 @@ import { saltRounds } from 'src/common/constants';
 import { PrismaService } from 'src/database/prisma.service';
 import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { Role } from '@prisma/client';
+import { verifyToken } from 'src/common/utils/verifyToken';
 
 @Injectable()
 export class AuthService {
@@ -51,6 +52,7 @@ export class AuthService {
   async signIn(signInDto: SignInDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: signInDto.email },
+      include: { organization: true, studentProfile: true },
     });
 
     const isPasswordValid = await bcrypt.compare(
@@ -79,7 +81,7 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
-    const decodedRefreshToken = this.verifyToken(
+    const decodedRefreshToken = verifyToken(
       refreshToken,
       process.env.JWT_REFRESH_SECRET,
     );
@@ -126,15 +128,6 @@ export class AuthService {
       secure: process.env.COOKIE_SECURE === 'true',
       sameSite: 'lax',
     });
-  }
-
-  public verifyToken(token: string, secret: string) {
-    try {
-      return this.jwtService.verify(token, { secret });
-    } catch (err) {
-      console.error(err);
-      return null;
-    }
   }
 
   private async generateAndStoreTokens(

@@ -4,7 +4,7 @@ import { OrganizationResponseDto } from 'src/organization/dto/organization.respo
 import { ResponseStudentProfileDto } from 'src/common/baseDto/responseStudentProfile.dto';
 
 @Exclude()
-export class ResponseUserDto {
+export class ResponseUserMeDto {
   @Expose()
   id: number;
 

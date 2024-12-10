@@ -18,7 +18,7 @@ export class UserController {
   @Get('profile')
   @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
   async getMe(@Req() request: Request & { cookies: { refreshToken: string } }) {
-    const refreshTokenRequest = request.cookies['refreshToken'];
+    const refreshTokenRequest = request.cookies['accessToken'];
 
     return await this.userService.getUser(refreshTokenRequest);
   }

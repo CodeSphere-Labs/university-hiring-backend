@@ -8,10 +8,11 @@ import { Prisma } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
   async getUser(refreshToken: string) {
     const decodedRefreshToken = verifyToken(
       refreshToken,
-      process.env.JWT_REFRESH_SECRET,
+      process.env.JWT_ACCESS_SECRET,
     );
 
     if (!decodedRefreshToken) {

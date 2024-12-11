@@ -9,37 +9,33 @@ import { Prisma } from '@prisma/client';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getUser(refreshToken: string) {
-    const decodedRefreshToken = verifyToken(
-      refreshToken,
+  async getUser(accessToken: string) {
+    const decodedAccessToken = verifyToken(
+      accessToken,
       process.env.JWT_ACCESS_SECRET,
     );
 
-    if (!decodedRefreshToken) {
-      throw new ForbiddenException('Invalid Refresh Token');
+    if (!decodedAccessToken) {
+      throw new ForbiddenException('Invalid Access Token');
     }
 
     const user = await this.prisma.user.findUnique({
-      where: { id: decodedRefreshToken['sub'] },
+      where: { id: decodedAccessToken['sub'] },
       include: {
         organization: true,
         studentProfile: true,
       },
     });
 
-    const isHashTokenValid = await bcrypt.compare(
-      refreshToken,
-      user.refreshToken,
-    );
-
-    if (!user || !isHashTokenValid) {
-      throw new ForbiddenException('Access Denied: Invalid refresh token');
+    if (!user) {
+      throw new ForbiddenException('Access Denied: Invalid access token');
     }
+
     return user;
   }
 
   async updateUser(refreshToken: string, userBody: UpdateUserDto) {
-    const { resume, aboutMe, githubLink, projects, ...userUpdates } = userBody;
+    const { resume, githubLink, projects, ...userUpdates } = userBody;
 
     const decodedRefreshToken = verifyToken(
       refreshToken,
@@ -76,7 +72,6 @@ export class UserService {
           studentProfile: {
             update: {
               resume,
-              aboutMe,
               githubLink,
               projects: projects as unknown as Prisma.JsonArray,
             },

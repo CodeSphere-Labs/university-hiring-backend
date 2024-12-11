@@ -17,10 +17,10 @@ export class UserController {
 
   @Get('profile')
   @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
-  async getMe(@Req() request: Request & { cookies: { refreshToken: string } }) {
-    const refreshTokenRequest = request.cookies['accessToken'];
+  async getMe(@Req() request: Request & { cookies: { accessToken: string } }) {
+    const accessTokenRequest = request.cookies['accessToken'];
 
-    return await this.userService.getUser(refreshTokenRequest);
+    return await this.userService.getUser(accessTokenRequest);
   }
 
   @Patch('profile')

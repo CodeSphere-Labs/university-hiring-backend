@@ -28,6 +28,10 @@ model User {
   email           String    @unique
   passwordHash    String
   avatarUrl       String?
+  aboutMe         String?
+  telegramLink    String?     
+  vkLink          String?     
+
   role            Role
   organization    Organization? @relation(fields: [organizationId], references: [id])
   organizationId  Int?
@@ -59,7 +63,6 @@ model StudentProfile {
   id            Int       @id @default(autoincrement())
   userId        Int       @unique
   resume        String?
-  aboutMe       String?
   githubLink    String?
   projects      Json?
 

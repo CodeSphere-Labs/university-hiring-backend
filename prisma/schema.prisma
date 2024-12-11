@@ -16,6 +16,8 @@ model Organization {
 
   users       User[]
   invitations Invitation[]
+  favoriteStudents User[]    @relation("FavoriteStudents")
+
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -35,6 +37,7 @@ model User {
 
   refreshToken   String?
   studentProfile StudentProfile? @relation
+  favoredBy       Organization[] @relation("FavoriteStudents")
 }
 
 model Invitation {

@@ -1,7 +1,6 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { verifyToken } from 'src/common/utils/verifyToken';
 import { PrismaService } from 'src/database/prisma.service';
-import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from 'src/user/dto/user.change.request.dto';
 import { Prisma } from '@prisma/client';
 
@@ -34,19 +33,19 @@ export class UserService {
     return user;
   }
 
-  async updateUser(refreshToken: string, userBody: UpdateUserDto) {
+  async updateUser(accessToken: string, userBody: UpdateUserDto) {
     const { resume, githubLink, projects, ...userUpdates } = userBody;
 
-    const decodedRefreshToken = verifyToken(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET,
+    const decodedAccessToken = verifyToken(
+      accessToken,
+      process.env.JWT_ACCESS_SECRET,
     );
 
-    if (!decodedRefreshToken) {
-      throw new ForbiddenException('Invalid Refresh Token');
+    if (!decodedAccessToken) {
+      throw new ForbiddenException('Invalid Access Token');
     }
 
-    const userId = decodedRefreshToken['sub'];
+    const userId = decodedAccessToken['sub'];
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -56,12 +55,7 @@ export class UserService {
       },
     });
 
-    const isHashTokenValid = await bcrypt.compare(
-      refreshToken,
-      user.refreshToken,
-    );
-
-    if (!user || !isHashTokenValid) {
+    if (!user) {
       throw new ForbiddenException('Access Denied: Invalid refresh token');
     }
 
@@ -69,11 +63,19 @@ export class UserService {
       return await this.prisma.user.update({
         where: { id: userId },
         data: {
+          ...userUpdates,
           studentProfile: {
-            update: {
-              resume,
-              githubLink,
-              projects: projects as unknown as Prisma.JsonArray,
+            upsert: {
+              create: {
+                resume,
+                githubLink,
+                projects: projects as unknown as Prisma.JsonArray,
+              },
+              update: {
+                resume,
+                githubLink,
+                projects: projects as unknown as Prisma.JsonArray,
+              },
             },
           },
         },

@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsUrl } from 'class-validator';
 
 export class CreateOrganizationDto {
   @IsNotEmpty()
@@ -9,4 +9,13 @@ export class CreateOrganizationDto {
   @IsString()
   @IsEmail()
   readonly email: string;
+
+  @IsNotEmpty()
+  @IsString()
+  readonly about: string;
+
+  @IsNotEmpty()
+  @IsString()
+  @IsUrl()
+  readonly websiteUrl: string;
 }

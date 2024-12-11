@@ -12,7 +12,16 @@ export class ResponseUserDto {
   email: string;
 
   @Expose()
-  avatarUrl?: string;
+  avatarUrl: string;
+
+  @Expose()
+  aboutMe: string;
+
+  @Expose()
+  telegramLink: string;
+
+  @Expose()
+  vkLink: string;
 
   @Expose()
   role: Role;

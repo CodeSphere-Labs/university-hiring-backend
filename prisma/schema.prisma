@@ -13,6 +13,8 @@ model Organization {
   type        OrganizationType
   email       String    @unique
   logoUrl     String?
+  websiteUrl  String  
+  about       String 
 
   users       User[]
   invitations Invitation[]
@@ -39,8 +41,8 @@ model User {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  refreshToken   String?
-  studentProfile StudentProfile? @relation
+  refreshToken    String?
+  studentProfile  StudentProfile? @relation
   favoredBy       Organization[] @relation("FavoriteStudents")
 }
 

@@ -37,6 +37,8 @@ export class OrganizationService {
       data: {
         email: registrationDto.email,
         name: registrationDto.name,
+        about: registrationDto.about,
+        websiteUrl: registrationDto.websiteUrl,
         type: 'COMPANY',
       },
     });

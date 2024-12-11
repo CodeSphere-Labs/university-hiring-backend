@@ -27,9 +27,9 @@ export class UserController {
   @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
   async patchMe(
     @Body() user: UpdateUserDto,
-    @Req() request: Request & { cookies: { refreshToken: string } },
+    @Req() request: Request & { cookies: { accessToken: string } },
   ) {
-    const refreshTokenRequest = request.cookies['refreshToken'];
-    return await this.userService.updateUser(refreshTokenRequest, user);
+    const accessTokenRequest = request.cookies['accessToken'];
+    return await this.userService.updateUser(accessTokenRequest, user);
   }
 }

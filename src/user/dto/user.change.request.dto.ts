@@ -22,6 +22,14 @@ export class UpdateUserDto {
   readonly aboutMe?: string;
 
   @IsOptional()
+  @IsString()
+  readonly telegramLink?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly vkLink?: string;
+
+  @IsOptional()
   @IsUrl()
   readonly githubLink?: string;
 

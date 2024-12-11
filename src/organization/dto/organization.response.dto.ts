@@ -10,6 +10,12 @@ export class OrganizationResponseDto extends ResponseUserDto {
   logoUrl: string;
 
   @Expose()
+  about: string;
+
+  @Expose()
+  websiteUrl: string;
+
+  @Expose()
   @Type(() => ResponseUserDto)
   favoriteStudents: ResponseUserDto[];
 }

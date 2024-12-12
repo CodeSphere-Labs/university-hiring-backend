@@ -39,7 +39,6 @@ export class OrganizationController {
   }
 
   @Patch(':id')
-  // @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
   async changeOrganization(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: ChangeOrganizationDto,

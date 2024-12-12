@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { skills } from './constants';
 const prisma = new PrismaClient();
 
 async function main() {
@@ -14,6 +15,12 @@ async function main() {
       role: 'ADMIN',
     },
   });
+
+  for (const skill of skills) {
+    await prisma.skill.create({
+      data: skill,
+    });
+  }
 }
 
 main()

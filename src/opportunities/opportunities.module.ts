@@ -4,6 +4,6 @@ import { OpportunitiesService } from './opportunities.service';
 
 @Module({
   controllers: [OpportunitiesController],
-  providers: [OpportunitiesService]
+  providers: [OpportunitiesService],
 })
 export class OpportunitiesModule {}

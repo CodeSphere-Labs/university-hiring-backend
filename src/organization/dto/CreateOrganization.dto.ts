@@ -3,19 +3,19 @@ import { IsEmail, IsNotEmpty, IsString, IsUrl } from 'class-validator';
 export class CreateOrganizationDto {
   @IsNotEmpty()
   @IsString()
-  readonly name: string;
+  readonly name?: string;
 
   @IsNotEmpty()
   @IsString()
   @IsEmail()
-  readonly email: string;
+  readonly email?: string;
 
   @IsNotEmpty()
   @IsString()
-  readonly about: string;
+  readonly about?: string;
 
   @IsNotEmpty()
   @IsString()
   @IsUrl()
-  readonly websiteUrl: string;
+  readonly websiteUrl?: string;
 }

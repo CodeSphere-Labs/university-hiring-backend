@@ -32,6 +32,13 @@ export class OrganizationService {
     });
   }
 
+  async change(id: number, body: CreateOrganizationDto) {
+    return await this.prisma.organization.update({
+      where: { id },
+      data: body,
+    });
+  }
+
   async registration(registrationDto: CreateOrganizationDto) {
     const organization = await this.prisma.organization.create({
       data: {
@@ -101,20 +108,6 @@ export class OrganizationService {
       },
       include: {
         favoriteStudents: true,
-      },
-    });
-  }
-
-  async getOrganizationWithFavorites(organizationId: number) {
-    return await this.prisma.organization.findUnique({
-      where: { id: organizationId },
-      include: {
-        favoriteStudents: {
-          include: {
-            studentProfile: true,
-            organization: true,
-          },
-        },
       },
     });
   }

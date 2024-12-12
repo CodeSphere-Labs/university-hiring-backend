@@ -17,6 +17,7 @@ import { OrganizationService } from './organization.service';
 import { Roles } from 'src/common/guards/role.guard';
 import { TransformDataInterceptor } from 'src/common/transform.data';
 import { OrganizationResponseDto } from 'src/organization/dto/organization.response.dto';
+import { ChangeOrganizationDto } from 'src/organization/dto/change.organization.dto';
 
 @Controller('organizations')
 export class OrganizationController {
@@ -35,6 +36,15 @@ export class OrganizationController {
     withFavorites: boolean,
   ) {
     return this.organizationService.getById(id, withFavorites);
+  }
+
+  @Patch(':id')
+  // @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
+  async changeOrganization(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: ChangeOrganizationDto,
+  ) {
+    return this.organizationService.change(id, body);
   }
 
   @Patch(':id/favorites/:studentId')

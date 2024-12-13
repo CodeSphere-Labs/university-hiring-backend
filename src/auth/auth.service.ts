@@ -14,7 +14,6 @@ import { saltRounds } from 'src/common/constants';
 import { PrismaService } from 'src/database/prisma.service';
 import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { Role } from '@prisma/client';
-import { verifyToken } from 'src/common/utils/verifyToken';
 
 @Injectable()
 export class AuthService {
@@ -81,10 +80,9 @@ export class AuthService {
   }
 
   async refreshToken(refreshToken: string) {
-    const decodedRefreshToken = verifyToken(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET,
-    );
+    const decodedRefreshToken = this.jwtService.verify(refreshToken, {
+      secret: process.env.JWT_REFRESH_SECRET,
+    });
 
     if (!decodedRefreshToken) {
       throw new ForbiddenException('Invalid Refresh Token');

@@ -6,6 +6,10 @@ import {
   Req,
   UseInterceptors,
 } from '@nestjs/common';
+import {
+  UserInterceptor,
+  UserInterceptorRequest,
+} from 'src/common/interceptors/user.interceptor';
 import { TransformDataInterceptor } from 'src/common/transform.data';
 import { UpdateUserDto } from 'src/user/dto/user.change.request.dto';
 import { ResponseUserMeDto } from 'src/user/dto/user.response.dto';
@@ -16,20 +20,19 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('profile')
+  @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
-  async getMe(@Req() request: Request & { cookies: { accessToken: string } }) {
-    const accessTokenRequest = request.cookies['accessToken'];
-
-    return await this.userService.getUser(accessTokenRequest);
+  async getMe(@Req() request: UserInterceptorRequest) {
+    return request.user;
   }
 
   @Patch('profile')
+  @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
   async patchMe(
-    @Body() user: UpdateUserDto,
-    @Req() request: Request & { cookies: { accessToken: string } },
+    @Body() dto: UpdateUserDto,
+    @Req() request: UserInterceptorRequest,
   ) {
-    const accessTokenRequest = request.cookies['accessToken'];
-    return await this.userService.updateUser(accessTokenRequest, user);
+    return await this.userService.updateUser(request.user, dto);
   }
 }

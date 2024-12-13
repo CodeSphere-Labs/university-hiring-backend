@@ -8,22 +8,16 @@ import {
 import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
+import { User } from '@prisma/client';
+
+export type UserInterceptorResponse = Omit<
+  User,
+  'passwordHash' | 'refreshToken'
+>;
 
 export interface UserInterceptorRequest extends Request {
-  user: {
-    id: number;
-    email: string;
-    role: string;
-    organizationId: number;
-  };
+  user: UserInterceptorResponse;
   cookies: { accessToken: string };
-}
-
-export interface UserInterceptorResponse {
-  id: number;
-  email: string;
-  role: string;
-  organizationId: number;
 }
 
 @Injectable()
@@ -55,17 +49,17 @@ export class UserInterceptor implements NestInterceptor {
 
       const user = await this.prisma.user.findUnique({
         where: { id: decodedToken.sub },
+        include: { organization: true, studentProfile: true },
       });
 
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { passwordHash, refreshToken, ...userWithoutSecrets } = user;
 
       request.user = {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        organizationId: user.organizationId,
+        ...userWithoutSecrets,
       };
 
       return next.handle();

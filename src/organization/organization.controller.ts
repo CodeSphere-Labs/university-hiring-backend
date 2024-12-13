@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  Req,
   UseInterceptors,
 } from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/CreateOrganization.dto';
@@ -18,6 +19,10 @@ import { Roles } from 'src/common/guards/role.guard';
 import { TransformDataInterceptor } from 'src/common/transform.data';
 import { OrganizationResponseDto } from 'src/organization/dto/organization.response.dto';
 import { ChangeOrganizationDto } from 'src/organization/dto/change.organization.dto';
+import {
+  UserInterceptor,
+  UserInterceptorRequest,
+} from 'src/common/interceptors/user.interceptor';
 
 @Controller('organizations')
 export class OrganizationController {
@@ -38,34 +43,38 @@ export class OrganizationController {
     return this.organizationService.getById(id, withFavorites);
   }
 
-  @Patch(':id')
+  @Patch()
+  @UseInterceptors(UserInterceptor)
   async changeOrganization(
-    @Param('id', ParseIntPipe) id: number,
+    @Req() request: UserInterceptorRequest,
     @Body() body: ChangeOrganizationDto,
   ) {
-    return this.organizationService.change(id, body);
+    return this.organizationService.change(request.user.organizationId, body);
   }
 
-  @Patch(':id/favorites/:studentId')
+  @Patch('favorites/:studentId')
+  @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
   async addFavoriteStudent(
-    @Param('id', ParseIntPipe) organizationId: number,
+    @Req() request: UserInterceptorRequest,
     @Param('studentId', ParseIntPipe) studentId: number,
   ) {
     return this.organizationService.addFavoriteStudent(
-      organizationId,
+      request.user.organizationId,
       studentId,
     );
   }
 
-  @Delete(':id/favorites/:studentId')
+  @Delete('favorites/:studentId')
+  @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
   async removeFavoriteStudent(
-    @Param('id', ParseIntPipe) organizationId: number,
+    @Req() request: UserInterceptorRequest,
+
     @Param('studentId', ParseIntPipe) studentId: number,
   ) {
     return this.organizationService.removeFavoriteStudent(
-      organizationId,
+      request.user.organizationId,
       studentId,
     );
   }

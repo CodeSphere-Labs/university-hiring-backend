@@ -15,11 +15,19 @@ export class OpportunitiesService {
     return await this.prisma.opportunity.findMany({
       include: {
         requiredSkills: true,
-
+        organization: true,
         ...(withResponses && {
           responses: {
             include: {
-              student: true,
+              student: {
+                include: {
+                  user: {
+                    include: {
+                      organization: true,
+                    },
+                  },
+                },
+              },
             },
           },
         }),

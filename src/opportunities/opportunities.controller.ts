@@ -13,6 +13,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { Roles } from 'src/common/guards/role.guard';
+import { AllOpportunityInterceptor } from 'src/common/interceptors/all.opportunity.interceptor';
 import {
   UserInterceptor,
   UserInterceptorRequest,
@@ -25,6 +26,7 @@ export class OpportunitiesController {
   constructor(private readonly opportunityService: OpportunitiesService) {}
 
   @Get()
+  @UseInterceptors(new AllOpportunityInterceptor())
   async all(
     @Query('withResponses', new DefaultValuePipe(false), ParseBoolPipe)
     withResponses: boolean,

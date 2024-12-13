@@ -1,8 +1,14 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
+  Param,
+  ParseBoolPipe,
+  ParseIntPipe,
+  Patch,
   Post,
+  Query,
   Req,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,8 +25,11 @@ export class OpportunitiesController {
   constructor(private readonly opportunityService: OpportunitiesService) {}
 
   @Get()
-  async all() {
-    return this.opportunityService.findAll();
+  async all(
+    @Query('withResponses', new DefaultValuePipe(false), ParseBoolPipe)
+    withResponses: boolean,
+  ) {
+    return this.opportunityService.findAll(withResponses);
   }
 
   @Post()
@@ -31,5 +40,20 @@ export class OpportunitiesController {
     @Body() dto: CreateOpportunityDto,
   ) {
     return this.opportunityService.create(dto, request.user);
+  }
+
+  @Patch('response/:opportunityId')
+  @UseInterceptors(UserInterceptor)
+  @Roles(['STUDENT'])
+  async response(
+    @Req() request: UserInterceptorRequest,
+    @Param('opportunityId', ParseIntPipe) opportunityId: number,
+    @Body('coverLetter') coverLetter?: string,
+  ) {
+    return this.opportunityService.response(
+      opportunityId,
+      request.user,
+      coverLetter,
+    );
   }
 }

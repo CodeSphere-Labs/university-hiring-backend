@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserInterceptorResponse } from 'src/common/interceptors/user.interceptor';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateOpportunityDto } from 'src/opportunities/dto/create.opportunity.dto';
@@ -7,11 +11,18 @@ import { CreateOpportunityDto } from 'src/opportunities/dto/create.opportunity.d
 export class OpportunitiesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
+  async findAll(withResponses: boolean) {
     return await this.prisma.opportunity.findMany({
       include: {
-        responses: true,
         requiredSkills: true,
+
+        ...(withResponses && {
+          responses: {
+            include: {
+              student: true,
+            },
+          },
+        }),
       },
     });
   }
@@ -21,7 +32,7 @@ export class OpportunitiesService {
 
     const skillConnections = skillIds.map((id) => ({ id }));
 
-    return this.prisma.opportunity.create({
+    return await this.prisma.opportunity.create({
       data: {
         title,
         description,
@@ -29,6 +40,41 @@ export class OpportunitiesService {
         requiredSkills: {
           connect: skillConnections,
         },
+      },
+    });
+  }
+
+  async response(
+    opportunityId: number,
+    user: UserInterceptorResponse,
+    coverLetter: string,
+  ) {
+    const studentProfile = await this.prisma.studentProfile.findUnique({
+      where: { userId: user.id },
+    });
+
+    if (!studentProfile) {
+      throw new NotFoundException('Student profile not found for this user.');
+    }
+
+    const existingResponse = await this.prisma.opportunityResponse.findFirst({
+      where: {
+        opportunityId,
+        studentId: studentProfile.id,
+      },
+    });
+
+    if (existingResponse) {
+      throw new ConflictException(
+        'You have already responded to this opportunity.',
+      );
+    }
+
+    return await this.prisma.opportunityResponse.create({
+      data: {
+        opportunityId,
+        studentId: studentProfile.id,
+        coverLetter,
       },
     });
   }

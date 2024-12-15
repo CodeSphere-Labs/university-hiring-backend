@@ -12,6 +12,15 @@ export class ResponseUserDto {
   email: string;
 
   @Expose()
+  firstName: string;
+
+  @Expose()
+  lastName: string;
+
+  @Expose()
+  patronymic: string;
+
+  @Expose()
   avatarUrl: string;
 
   @Expose()

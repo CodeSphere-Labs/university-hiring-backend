@@ -27,6 +27,9 @@ model Organization {
 
 model User {
   id              Int       @id @default(autoincrement())
+  firstName       String
+  lastName        String
+  patronymic      String
   email           String    @unique
   passwordHash    String
   avatarUrl       String?

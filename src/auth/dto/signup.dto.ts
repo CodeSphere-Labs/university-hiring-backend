@@ -10,6 +10,18 @@ export class SignUpDto {
 
   @IsNotEmpty()
   @IsString()
+  firstName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  lastName: string;
+
+  @IsNotEmpty()
+  @IsString()
+  patronymic: string;
+
+  @IsNotEmpty()
+  @IsString()
   @ApiProperty()
   password: string;
 }

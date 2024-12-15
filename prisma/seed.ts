@@ -9,6 +9,9 @@ async function main() {
     },
     update: {},
     create: {
+      firstName: 'Admin',
+      lastName: 'Admin',
+      patronymic: 'Admin',
       email: 'R7PbZ@example.com',
       passwordHash:
         '$2b$10$pRMWOouBcx7YE2FqffF7KucxvTxxs9/iuITDPjlU5QiO1AVZg3YMa',

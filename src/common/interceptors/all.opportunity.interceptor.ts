@@ -21,7 +21,9 @@ export class AllOpportunityInterceptor implements NestInterceptor {
                   coverLetter: response.coverLetter,
                   student: {
                     id: response.student.id,
-                    userId: response.student.user.id,
+                    firstName: response.student.user.firstName,
+                    lastName: response.student.user.lastName,
+                    patronymic: response.student.user.patronymic,
                     resume: response.student.resume,
                     githubLink: response.student.githubLink,
                     projects: response.student.projects,
@@ -72,6 +74,9 @@ interface Student {
   id: number;
   userId: number;
 
+  firstName: string;
+  lastName: string;
+  patronymic: string;
   email: string;
   avatarUrl: string;
   aboutMe: string;

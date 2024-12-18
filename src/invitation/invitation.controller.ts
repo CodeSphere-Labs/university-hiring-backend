@@ -1,8 +1,6 @@
 import {
   Body,
   Controller,
-  HttpException,
-  HttpStatus,
   Post,
   Query,
   Res,
@@ -29,30 +27,14 @@ export class InvitationController {
   @Post('confirm-invitation')
   @UseInterceptors(new TransformDataInterceptor(ResponseUserDto))
   async confirmRegisration(
-    @Body() confirmInvitation: ConfirmInvitationDto,
+    @Body() confirmInvitationDto: ConfirmInvitationDto,
     @Query('token') token: string,
     @Res({ passthrough: true }) response: Response,
   ) {
-    try {
-      const invitation =
-        await this.invitationService.verifyInvitationToken(token);
-
-      const user = await this.invitationService.registerUser(
-        confirmInvitation,
-        invitation.role,
-        response,
-      );
-
-      const updatedUser = await this.invitationService.addUserToOrganization(
-        user.id,
-        invitation.organizationId,
-      );
-
-      await this.invitationService.deleteInvitation(invitation.id);
-
-      return updatedUser;
-    } catch {
-      throw new HttpException('Registration failed', HttpStatus.BAD_REQUEST);
-    }
+    return await this.invitationService.confirmInvitation(
+      confirmInvitationDto,
+      token,
+      response,
+    );
   }
 }

@@ -1,3 +1,4 @@
+import { Role } from '@prisma/client';
 import {
   IsEmail,
   IsEnum,
@@ -7,15 +8,14 @@ import {
   IsString,
 } from 'class-validator';
 
-enum Role {
-  STAFF = 'STAFF',
-  STUDENT = 'STUDENT',
-}
-
 export class CreateInvitationDto {
   @IsOptional()
   @IsNumber()
   readonly organizationId: number;
+
+  @IsOptional()
+  @IsNumber()
+  readonly groupId: number;
 
   @IsNotEmpty()
   @IsString()

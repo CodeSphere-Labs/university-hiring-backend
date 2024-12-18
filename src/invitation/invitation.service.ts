@@ -6,6 +6,7 @@ import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { Role } from '@prisma/client';
 import { Response } from 'express';
 import { randomUUID } from 'crypto';
+import { ConfirmInvitationDto } from 'src/invitation/dto/ConfirmInvitation.dto';
 
 @Injectable()
 export class InvitationService {
@@ -19,11 +20,31 @@ export class InvitationService {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
 
+    if (invitationDto.role === Role.STUDENT) {
+      if (!invitationDto.groupId) {
+        throw new HttpException('Group id is required', HttpStatus.BAD_REQUEST);
+      }
+
+      const existingGroup = await this.prisma.group.findUnique({
+        where: { id: invitationDto.groupId },
+      });
+
+      if (!existingGroup) {
+        throw new HttpException('Group not found', HttpStatus.NOT_FOUND);
+      }
+    }
+
+    const existingInvitation = await this.prisma.invitation.findFirst({
+      where: { email: invitationDto.email },
+    });
+
+    if (existingInvitation) {
+      throw new HttpException('User already invited', HttpStatus.BAD_REQUEST);
+    }
+
     const invite = await this.prisma.invitation.create({
       data: {
-        email: invitationDto.email,
-        role: invitationDto.role,
-        organizationId: invitationDto.organizationId,
+        ...invitationDto,
         token,
         expiresAt,
       },
@@ -32,7 +53,30 @@ export class InvitationService {
     return { inviteToken: invite.token };
   }
 
-  async verifyInvitationToken(token: string) {
+  async confirmInvitation(
+    confirmInvitationDto: ConfirmInvitationDto,
+    token: string,
+    response: Response,
+  ) {
+    const invitation = await this.verifyInvitationToken(token);
+
+    const user = await this.registerUser(
+      confirmInvitationDto,
+      invitation,
+      response,
+    );
+
+    const updatedUser = await this.addUserToOrganization(
+      user.id,
+      invitation.organizationId,
+    );
+
+    await this.deleteInvitation(invitation.id);
+
+    return updatedUser;
+  }
+
+  private async verifyInvitationToken(token: string) {
     try {
       const invitation = await this.prisma.invitation.findUnique({
         where: { token },
@@ -63,18 +107,22 @@ export class InvitationService {
     }
   }
 
-  async registerUser(user: SignUpDto, role: Role, response: Response) {
-    return await this.authService.signUp(user, role, response);
+  private async registerUser(
+    user: SignUpDto,
+    invintation: CreateInvitationDto,
+    response: Response,
+  ) {
+    return await this.authService.signUp(user, invintation, response);
   }
 
-  async addUserToOrganization(userId: number, organizationId: number) {
+  private async addUserToOrganization(userId: number, organizationId: number) {
     return await this.prisma.user.update({
       where: { id: userId },
       data: { organizationId },
     });
   }
 
-  async deleteInvitation(invitationId: number) {
+  private async deleteInvitation(invitationId: number) {
     await this.prisma.invitation.delete({ where: { id: invitationId } });
   }
 

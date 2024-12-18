@@ -14,6 +14,7 @@ import { saltRounds } from 'src/common/constants';
 import { PrismaService } from 'src/database/prisma.service';
 import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { Role } from '@prisma/client';
+import { CreateInvitationDto } from 'src/invitation/dto/CreateInvitation.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +23,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signUp(user: SignUpDto, role: Role, response: Response) {
+  async signUp(
+    user: SignUpDto,
+    invintation: CreateInvitationDto,
+    response: Response,
+  ) {
     const hashedPassword = await bcrypt.hash(user.password, saltRounds);
 
     const createdUser = await this.prisma.user.create({
@@ -32,14 +37,15 @@ export class AuthService {
         lastName: user.lastName,
         patronymic: user.patronymic,
         passwordHash: hashedPassword,
-        role,
+        role: invintation.role,
       },
     });
 
-    if (role === Role.STUDENT) {
+    if (invintation.role === Role.STUDENT) {
       await this.prisma.studentProfile.create({
         data: {
           userId: createdUser.id,
+          groupId: invintation.groupId,
         },
       });
     }

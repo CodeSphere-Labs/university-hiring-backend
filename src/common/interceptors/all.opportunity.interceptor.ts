@@ -20,7 +20,7 @@ export class AllOpportunityInterceptor implements NestInterceptor {
                   id: response.id,
                   coverLetter: response.coverLetter,
                   student: {
-                    id: response.student.id,
+                    id: response.student.user.id,
                     firstName: response.student.user.firstName,
                     lastName: response.student.user.lastName,
                     patronymic: response.student.user.patronymic,

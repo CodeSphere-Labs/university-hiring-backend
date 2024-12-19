@@ -10,8 +10,19 @@ import { PrismaService } from 'src/database/prisma.service';
 export class OrganizationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
-    return await this.prisma.organization.findMany();
+  async findAll(withFavorites: boolean = false) {
+    return await this.prisma.organization.findMany({
+      ...(withFavorites && {
+        include: {
+          favoriteStudents: {
+            include: {
+              studentProfile: true,
+              organization: true,
+            },
+          },
+        },
+      }),
+    });
   }
 
   async getById(id: number, withFavorites: boolean = false) {
@@ -109,6 +120,33 @@ export class OrganizationService {
       include: {
         favoriteStudents: true,
       },
+    });
+  }
+
+  async deleteOrganization(id: number) {
+    await this.prisma.opportunityResponse.deleteMany({
+      where: {
+        opportunity: {
+          organizationId: id,
+        },
+      },
+    });
+
+    await this.prisma.opportunity.deleteMany({
+      where: { organizationId: id },
+    });
+
+    await this.prisma.invitation.deleteMany({
+      where: { organizationId: id },
+    });
+
+    await this.prisma.user.updateMany({
+      where: { organizationId: id },
+      data: { organizationId: null },
+    });
+
+    return await this.prisma.organization.delete({
+      where: { id },
     });
   }
 }

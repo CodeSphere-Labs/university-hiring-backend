@@ -3,7 +3,6 @@ import { OrganizationModule } from './organization/organization.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { UserModule } from './user/user.module';
-import { StudentsModule } from './students/students.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { GroupsModule } from 'src/groups/groups.module';
 
@@ -13,7 +12,6 @@ import { GroupsModule } from 'src/groups/groups.module';
     AuthModule,
     InvitationModule,
     UserModule,
-    StudentsModule,
     OpportunitiesModule,
     GroupsModule,
   ],

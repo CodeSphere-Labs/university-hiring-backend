@@ -29,8 +29,12 @@ export class OrganizationController {
   constructor(private readonly organizationService: OrganizationService) {}
 
   @Get()
-  async all() {
-    return this.organizationService.findAll();
+  @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
+  async all(
+    @Query('withFavorites', new DefaultValuePipe(false), ParseBoolPipe)
+    withFavorites: boolean,
+  ) {
+    return this.organizationService.findAll(withFavorites);
   }
 
   @Get(':id')
@@ -70,7 +74,6 @@ export class OrganizationController {
   @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
   async removeFavoriteStudent(
     @Req() request: UserInterceptorRequest,
-
     @Param('studentId', ParseIntPipe) studentId: number,
   ) {
     return this.organizationService.removeFavoriteStudent(
@@ -83,5 +86,11 @@ export class OrganizationController {
   @Roles(['ADMIN'])
   async registration(@Body() registrationDto: CreateOrganizationDto) {
     return this.organizationService.registration(registrationDto);
+  }
+
+  @Delete(':id')
+  @Roles(['ADMIN'])
+  async delete(@Param('id', ParseIntPipe) id: number) {
+    return this.organizationService.deleteOrganization(id);
   }
 }

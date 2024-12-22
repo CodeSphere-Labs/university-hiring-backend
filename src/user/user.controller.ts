@@ -32,13 +32,6 @@ export class UserController {
     return this.userService.getAll(filters);
   }
 
-  @Get(':id')
-  @UseInterceptors(UserInterceptor)
-  @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
-  async getById(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.getById(id);
-  }
-
   @Get('profile')
   @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
@@ -56,11 +49,21 @@ export class UserController {
     return await this.userService.updateUser(request.user, dto);
   }
 
+  @Get(':id')
+  @UseInterceptors(UserInterceptor)
+  @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
+  async getById(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.getById(id);
+  }
+
   @Delete(':id')
   @Roles(['ADMIN'])
   @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(ResponseUserMeDto))
-  async delete(@Param('id', ParseIntPipe) id: number) {
-    return await this.userService.delete(id);
+  async delete(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: UserInterceptorRequest,
+  ) {
+    return await this.userService.delete(request.user, id);
   }
 }

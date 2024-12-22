@@ -86,4 +86,14 @@ export class OpportunitiesService {
       },
     });
   }
+
+  async delete(opportunityId: number) {
+    await this.prisma.opportunityResponse.deleteMany({
+      where: { opportunityId },
+    });
+
+    return await this.prisma.opportunity.delete({
+      where: { id: opportunityId },
+    });
+  }
 }

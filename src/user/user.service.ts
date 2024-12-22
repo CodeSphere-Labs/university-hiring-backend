@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/database/prisma.service';
 import { UpdateUserDto } from 'src/user/dto/user.change.request.dto';
 import { Prisma } from '@prisma/client';
@@ -76,7 +76,15 @@ export class UserService {
     });
   }
 
-  async delete(id: number) {
+  async delete(user: UserInterceptorResponse, id: number) {
+    const userToDelete = await this.prisma.user.findUniqueOrThrow({
+      where: { id },
+    });
+
+    if (userToDelete.role === user.role) {
+      throw new ForbiddenException('You cannot user with the same role');
+    }
+
     return await this.prisma.user.delete({ where: { id } });
   }
 }

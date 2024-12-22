@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   Param,
   ParseBoolPipe,
@@ -57,5 +58,11 @@ export class OpportunitiesController {
       request.user,
       coverLetter,
     );
+  }
+
+  @Delete(':id')
+  @Roles(['ADMIN', 'STAFF'])
+  async delete(@Param('id', ParseIntPipe) opportunityId: number) {
+    return this.opportunityService.delete(opportunityId);
   }
 }

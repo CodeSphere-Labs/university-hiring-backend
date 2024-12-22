@@ -47,7 +47,7 @@ export class UserInterceptor implements NestInterceptor {
         throw new UnauthorizedException('Invalid token');
       }
 
-      const user = await this.prisma.user.findUnique({
+      const user = await this.prisma.user.findUniqueOrThrow({
         where: { id: decodedToken.sub },
         include: { organization: true, studentProfile: true },
       });

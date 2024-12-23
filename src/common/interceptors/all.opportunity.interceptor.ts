@@ -12,7 +12,9 @@ export class AllOpportunityInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data: OpportunitiesResponse[]) => {
         try {
-          return data.map((opportunity) => {
+          const newData = Array.isArray(data) ? data : [data];
+
+          return newData.map((opportunity) => {
             return {
               ...opportunity,
               responses: opportunity.responses.map((response) => {

@@ -12,12 +12,11 @@ export class AllGroupsInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         try {
-          return data.map((group) => {
+          const newData = Array.isArray(data) ? data : [data];
+          return newData.map((group) => {
             return {
               ...group,
               students: group.students.map((student) => {
-                console.log(student);
-
                 return {
                   id: student.user.id,
                   resume: student.resume,

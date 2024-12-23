@@ -15,6 +15,9 @@ export class ResponseStudentProfileDto {
   githubLink?: string;
 
   @Expose()
+  groupId?: number;
+
+  @Expose()
   @Type(() => PetProjectResponseDto)
   projects?: PetProjectResponseDto[];
 

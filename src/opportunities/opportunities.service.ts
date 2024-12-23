@@ -87,6 +87,31 @@ export class OpportunitiesService {
     });
   }
 
+  async getById(opportunityId: number, withResponses: boolean) {
+    return await this.prisma.opportunity.findUniqueOrThrow({
+      where: { id: opportunityId },
+      ...(withResponses && {
+        include: {
+          requiredSkills: true,
+          organization: true,
+          responses: {
+            include: {
+              student: {
+                include: {
+                  user: {
+                    include: {
+                      organization: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    });
+  }
+
   async delete(opportunityId: number) {
     await this.prisma.opportunityResponse.deleteMany({
       where: { opportunityId },

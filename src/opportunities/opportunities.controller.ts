@@ -60,6 +60,16 @@ export class OpportunitiesController {
     );
   }
 
+  @Get(':id')
+  @UseInterceptors(new AllOpportunityInterceptor())
+  async getById(
+    @Param('id', ParseIntPipe) opportunityId: number,
+    @Query('withResponses', new DefaultValuePipe(false), ParseBoolPipe)
+    withResponses: boolean,
+  ) {
+    return this.opportunityService.getById(opportunityId, withResponses);
+  }
+
   @Delete(':id')
   @Roles(['ADMIN', 'STAFF'])
   async delete(@Param('id', ParseIntPipe) opportunityId: number) {

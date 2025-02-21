@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
 import { User } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 export type UserInterceptorResponse = Omit<
   User,
@@ -25,6 +26,7 @@ export class UserInterceptor implements NestInterceptor {
   constructor(
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
+    private configService: ConfigService,
   ) {}
 
   async intercept(
@@ -40,7 +42,7 @@ export class UserInterceptor implements NestInterceptor {
 
     try {
       const decodedToken = this.jwtService.verify(accessToken, {
-        secret: process.env.JWT_ACCESS_SECRET,
+        secret: this.configService.get<string>('jwt.access'),
       });
 
       if (!decodedToken.sub) {

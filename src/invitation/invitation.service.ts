@@ -7,12 +7,14 @@ import { Role } from '@prisma/client';
 import { Response } from 'express';
 import { randomUUID } from 'crypto';
 import { ConfirmInvitationDto } from 'src/invitation/dto/ConfirmInvitation.dto';
+import { EmailService } from 'src/email/email.service';
 
 @Injectable()
 export class InvitationService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly authService: AuthService,
+    private readonly emailService: EmailService,
   ) {}
 
   async createInvitation(invitationDto: CreateInvitationDto) {
@@ -42,6 +44,16 @@ export class InvitationService {
       throw new HttpException('User already invited', HttpStatus.BAD_REQUEST);
     }
 
+    const existingOrganization = await this.prisma.organization.findUnique({
+      where: {
+        id: invitationDto.organizationId,
+      },
+    });
+
+    if (!existingOrganization) {
+      throw new HttpException('Organization not found', HttpStatus.NOT_FOUND);
+    }
+
     const invite = await this.prisma.invitation.create({
       data: {
         ...invitationDto,
@@ -50,7 +62,12 @@ export class InvitationService {
       },
     });
 
-    return { inviteToken: invite.token };
+    await this.emailService.sendInvitationMail(
+      'nekit.nik2018@yandex.ru',
+      invite.token,
+    );
+
+    return { inviteToken: invite.token, message: 'Email send' };
   }
 
   async confirmInvitation(

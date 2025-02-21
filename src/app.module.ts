@@ -5,15 +5,24 @@ import { InvitationModule } from './invitation/invitation.module';
 import { UserModule } from './user/user.module';
 import { OpportunitiesModule } from './opportunities/opportunities.module';
 import { GroupsModule } from 'src/groups/groups.module';
+import { EmailModule } from './email/email.module';
+import { ConfigModule } from '@nestjs/config';
+import { configuration } from 'src/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: `${process.cwd()}/.env.${process.env.NODE_ENV}`,
+      load: [configuration],
+      isGlobal: true,
+    }),
     OrganizationModule,
     AuthModule,
     InvitationModule,
     UserModule,
     OpportunitiesModule,
     GroupsModule,
+    EmailModule,
   ],
 })
 export class AppModule {}

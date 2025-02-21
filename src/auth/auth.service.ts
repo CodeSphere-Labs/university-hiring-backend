@@ -6,7 +6,6 @@ import {
 
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import * as process from 'node:process';
 import type { Response } from 'express';
 
 import { SignInDto } from './dto/signin.dto';
@@ -15,12 +14,14 @@ import { PrismaService } from 'src/database/prisma.service';
 import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { Role } from '@prisma/client';
 import { CreateInvitationDto } from 'src/invitation/dto/CreateInvitation.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private jwtService: JwtService,
+    private configService: ConfigService,
   ) {}
 
   async signUp(
@@ -98,7 +99,7 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     const decodedRefreshToken = this.jwtService.verify(refreshToken, {
-      secret: process.env.JWT_REFRESH_SECRET,
+      secret: this.configService.get<string>('jwt.refresh'),
     });
 
     if (!decodedRefreshToken) {
@@ -134,13 +135,13 @@ export class AuthService {
   ): void {
     response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === 'true',
+      secure: this.configService.get<boolean>('cookie.secure'),
       sameSite: 'lax',
     });
 
     response.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.COOKIE_SECURE === 'true',
+      secure: this.configService.get<boolean>('cookie.secure'),
       sameSite: 'lax',
     });
   }
@@ -159,12 +160,18 @@ export class AuthService {
   private async getTokens(userId: number, email: string, role: string) {
     const accessToken = await this.jwtService.signAsync(
       { sub: userId, email, role },
-      { secret: process.env.JWT_ACCESS_SECRET, expiresIn: '15m' },
+      {
+        secret: this.configService.get<string>('jwt.access'),
+        expiresIn: '15m',
+      },
     );
 
     const refreshToken = await this.jwtService.signAsync(
       { sub: userId, email },
-      { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '30d' },
+      {
+        secret: this.configService.get<string>('jwt.refresh'),
+        expiresIn: '30d',
+      },
     );
 
     return { accessToken, refreshToken };

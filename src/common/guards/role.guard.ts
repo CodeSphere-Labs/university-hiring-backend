@@ -6,12 +6,16 @@ import {
   UseGuards,
   applyDecorators,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(
+    private reflector: Reflector,
+    private configService: ConfigService,
+  ) {}
 
   canActivate(context: ExecutionContext): boolean {
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
@@ -36,7 +40,7 @@ export class RolesGuard implements CanActivate {
     try {
       const decodedAccessToken = jwt.verify(
         accessToken,
-        process.env.JWT_ACCESS_SECRET,
+        this.configService.get<string>('jwt.access'),
       );
 
       const userRole = decodedAccessToken['role'];

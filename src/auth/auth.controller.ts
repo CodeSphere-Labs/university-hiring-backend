@@ -4,20 +4,21 @@ import {
   Get,
   HttpException,
   HttpStatus,
-  Param,
   Post,
   Req,
   Res,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 import type { Response } from 'express';
 import { SignInDto } from './dto/signin.dto';
-import { AccessTokenGuard } from 'src/common/guards/accessToken.guard';
 import { TransformDataInterceptor } from 'src/common/transform.data';
 import { ResponseUserDto } from 'src/common/baseDto/responseUser.dto';
+import {
+  UserInterceptor,
+  UserInterceptorRequest,
+} from 'src/common/interceptors/user.interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -70,13 +71,16 @@ export class AuthController {
     }
   }
 
-  @UseGuards(AccessTokenGuard)
-  @Get('log-out/:id')
+  @UseInterceptors(UserInterceptor)
+  @Get('log-out')
   async logout(
-    @Param('id') id: string | number,
-  ): Promise<{ success: boolean }> {
+    @Req() request: UserInterceptorRequest,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     try {
-      await this.authService.logout(Number(id));
+      await this.authService.logout(Number(request.user.id));
+      response.clearCookie('accessToken');
+      response.clearCookie('refreshToken');
       return { success: true };
     } catch {
       throw new HttpException('Invalid refresh token', HttpStatus.BAD_REQUEST);

@@ -5,6 +5,7 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
   UseInterceptors,
@@ -15,10 +16,6 @@ import type { Response } from 'express';
 import { SignInDto } from './dto/signin.dto';
 import { TransformDataInterceptor } from 'src/common/transform.data';
 import { ResponseUserDto } from 'src/common/baseDto/responseUser.dto';
-import {
-  UserInterceptor,
-  UserInterceptorRequest,
-} from 'src/common/interceptors/user.interceptor';
 
 @Controller('auth')
 export class AuthController {
@@ -71,14 +68,13 @@ export class AuthController {
     }
   }
 
-  @UseInterceptors(UserInterceptor)
-  @Get('log-out')
+  @Get('logout')
   async logout(
-    @Req() request: UserInterceptorRequest,
+    @Query('id') id: string,
     @Res({ passthrough: true }) response: Response,
   ) {
     try {
-      await this.authService.logout(Number(request.user.id));
+      await this.authService.logout(Number(id));
       response.clearCookie('accessToken');
       response.clearCookie('refreshToken');
       return { success: true };

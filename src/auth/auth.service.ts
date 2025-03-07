@@ -90,8 +90,12 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    await this.prisma.user.update({
+    const user = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
+    });
+
+    await this.prisma.user.update({
+      where: { id: user.id },
       data: { refreshToken: null },
     });
     return { message: 'Logged out successfully' };

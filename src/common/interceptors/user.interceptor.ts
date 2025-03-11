@@ -65,8 +65,7 @@ export class UserInterceptor implements NestInterceptor {
       };
 
       return next.handle();
-    } catch (err) {
-      console.error(err);
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

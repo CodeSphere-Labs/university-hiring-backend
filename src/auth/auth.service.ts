@@ -69,7 +69,14 @@ export class AuthService {
   async signIn(signInDto: SignInDto) {
     const user = await this.prisma.user.findUnique({
       where: { email: signInDto.email },
-      include: { organization: true, studentProfile: true },
+      include: {
+        organization: true,
+        studentProfile: {
+          include: {
+            group: true,
+          },
+        },
+      },
     });
 
     const isPasswordValid = await bcrypt.compare(

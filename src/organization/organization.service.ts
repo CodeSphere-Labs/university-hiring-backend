@@ -16,7 +16,11 @@ export class OrganizationService {
         include: {
           favoriteStudents: {
             include: {
-              studentProfile: true,
+              studentProfile: {
+                include: {
+                  group: true,
+                },
+              },
               organization: true,
             },
           },
@@ -34,7 +38,11 @@ export class OrganizationService {
         include: {
           favoriteStudents: {
             include: {
-              studentProfile: true,
+              studentProfile: {
+                include: {
+                  group: true,
+                },
+              },
               organization: true,
             },
           },

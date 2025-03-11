@@ -51,9 +51,15 @@ export class UserInterceptor implements NestInterceptor {
 
       const user = await this.prisma.user.findUniqueOrThrow({
         where: { id: decodedToken.sub },
-        include: { organization: true, studentProfile: true },
+        include: {
+          organization: true,
+          studentProfile: {
+            include: {
+              group: true,
+            },
+          },
+        },
       });
-
       if (!user) {
         throw new UnauthorizedException('User not found');
       }

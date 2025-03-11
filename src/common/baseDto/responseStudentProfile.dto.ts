@@ -1,5 +1,13 @@
 import { Exclude, Expose, Type } from 'class-transformer';
 
+class ResponseGroupDto {
+  @Expose()
+  readonly id: number;
+
+  @Expose()
+  readonly name: string;
+}
+
 @Exclude()
 export class ResponseStudentProfileDto {
   @Expose()
@@ -15,7 +23,8 @@ export class ResponseStudentProfileDto {
   githubLink?: string;
 
   @Expose()
-  groupId?: number;
+  @Type(() => ResponseGroupDto)
+  group?: ResponseGroupDto;
 
   @Expose()
   @Type(() => PetProjectResponseDto)

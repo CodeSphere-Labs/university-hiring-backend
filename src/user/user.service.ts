@@ -25,7 +25,11 @@ export class UserService {
     return await this.prisma.user.findMany({
       where: whereClause,
       include: {
-        studentProfile: true,
+        studentProfile: {
+          include: {
+            group: true,
+          },
+        },
         organization: true,
       },
     });
@@ -35,7 +39,11 @@ export class UserService {
     return await this.prisma.user.findUniqueOrThrow({
       where: { id },
       include: {
-        studentProfile: true,
+        studentProfile: {
+          include: {
+            group: true,
+          },
+        },
         organization: true,
       },
     });
@@ -65,7 +73,11 @@ export class UserService {
           },
         },
         include: {
-          studentProfile: true,
+          studentProfile: {
+            include: {
+              group: true,
+            },
+          },
         },
       });
     }

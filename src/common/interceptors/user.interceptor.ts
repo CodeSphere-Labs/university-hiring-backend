@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Injectable,
   NestInterceptor,
@@ -56,6 +57,7 @@ export class UserInterceptor implements NestInterceptor {
           studentProfile: {
             include: {
               group: true,
+              skills: true,
             },
           },
         },
@@ -63,11 +65,21 @@ export class UserInterceptor implements NestInterceptor {
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { passwordHash, refreshToken, ...userWithoutSecrets } = user;
+      const {
+        passwordHash,
+        refreshToken,
+        studentProfile,
+        ...userWithoutSecrets
+      } = user;
 
       request.user = {
         ...userWithoutSecrets,
+        ...(user.role === 'STUDENT' && {
+          studentProfile: {
+            ...studentProfile,
+            skills: studentProfile.skills.map((skill) => skill.name),
+          },
+        }),
       };
 
       return next.handle();

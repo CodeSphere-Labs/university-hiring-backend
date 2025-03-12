@@ -38,6 +38,11 @@ export class UpdateUserDto {
   @ValidateNested({ each: true })
   @Type(() => PetProjectDto)
   readonly projects?: PetProjectDto[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[];
 }
 
 export class PetProjectDto {

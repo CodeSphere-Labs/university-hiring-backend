@@ -82,6 +82,7 @@ model StudentProfile {
 
   user          User      @relation(fields: [userId], references: [id])
   opportunityResponse OpportunityResponse[]
+  skills          Skill[]         @relation("UserSkills")
 }
 
 model Opportunity {
@@ -112,7 +113,7 @@ model Skill {
   category    String
   description String?
   opportunities Opportunity[] @relation("RequiredSkills")
-
+  studentProfile StudentProfile[] @relation("UserSkills")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

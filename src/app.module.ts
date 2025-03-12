@@ -8,6 +8,7 @@ import { GroupsModule } from 'src/groups/groups.module';
 import { EmailModule } from './email/email.module';
 import { ConfigModule } from '@nestjs/config';
 import { configuration } from 'src/config';
+import { SkillsModule } from './skills/skills.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { configuration } from 'src/config';
     OpportunitiesModule,
     GroupsModule,
     EmailModule,
+    SkillsModule,
   ],
 })
 export class AppModule {}

@@ -35,6 +35,9 @@ export class ResponseStudentProfileDto {
 
   @Expose()
   updatedAt: string;
+
+  @Expose()
+  skills?: string[];
 }
 
 export class PetProjectResponseDto {

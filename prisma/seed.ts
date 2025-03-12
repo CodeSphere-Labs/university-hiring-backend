@@ -31,6 +31,13 @@ async function main() {
     },
   });
 
+  // Создаем скиллы
+  for (const skill of skills) {
+    await prisma.skill.create({
+      data: skill,
+    });
+  }
+
   // Создаем группы
   const group1 = await prisma.group.upsert({
     where: { name: 'ПИ-101' },
@@ -135,6 +142,15 @@ async function main() {
           technologies: ['React', 'TypeScript', 'Tailwind CSS'],
         },
       ],
+      skills: {
+        connect: [
+          { id: 1 }, // JavaScript
+          { id: 2 }, // Python
+          { id: 3 }, // React
+          { id: 4 }, // Node.js
+          { id: 5 }, // TypeScript
+        ],
+      },
     },
   });
 
@@ -172,13 +188,6 @@ async function main() {
       },
     },
   });
-
-  // Создаем скиллы
-  for (const skill of skills) {
-    await prisma.skill.create({
-      data: skill,
-    });
-  }
 
   // Создаем тестовую вакансию
   const createdSkills = await prisma.skill.findMany({

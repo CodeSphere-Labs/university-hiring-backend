@@ -50,10 +50,22 @@ export class UserService {
   }
 
   async updateUser(user: UserInterceptorResponse, userBody: UpdateUserDto) {
-    const { resume, githubLink, projects, ...userUpdates } = userBody;
+    const { resume, githubLink, projects, skills, ...userUpdates } = userBody;
 
     if (user.role === 'STUDENT') {
-      return await this.prisma.user.update({
+      let skillIds: { id: number }[] = [];
+      if (skills && skills.length > 0) {
+        const foundSkills = await this.prisma.skill.findMany({
+          where: {
+            name: {
+              in: skills,
+            },
+          },
+        });
+        skillIds = foundSkills.map((skill) => ({ id: skill.id }));
+      }
+
+      const updatedUser = await this.prisma.user.update({
         where: { id: user.id },
         data: {
           ...userUpdates,
@@ -63,28 +75,53 @@ export class UserService {
                 resume,
                 githubLink,
                 projects: projects as unknown as Prisma.JsonArray,
+                ...(skillIds.length > 0 && {
+                  skills: {
+                    connect: skillIds,
+                  },
+                }),
               },
               update: {
                 resume,
                 githubLink,
                 projects: projects as unknown as Prisma.JsonArray,
+                ...(skillIds.length > 0 && {
+                  skills: {
+                    set: skillIds,
+                  },
+                }),
               },
             },
           },
         },
         include: {
+          organization: true,
           studentProfile: {
             include: {
               group: true,
+              skills: true,
             },
           },
         },
       });
+
+      return {
+        ...updatedUser,
+        studentProfile: {
+          ...updatedUser.studentProfile,
+          skills:
+            updatedUser.studentProfile?.skills?.map((skill) => skill.name) ||
+            [],
+        },
+      };
     }
 
     return await this.prisma.user.update({
       where: { id: user.id },
       data: userUpdates,
+      include: {
+        organization: true,
+      },
     });
   }
 

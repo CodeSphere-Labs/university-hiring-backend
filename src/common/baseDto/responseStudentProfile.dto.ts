@@ -42,6 +42,9 @@ export class ResponseStudentProfileDto {
 
 export class PetProjectResponseDto {
   @Expose()
+  readonly id: string;
+
+  @Expose()
   readonly name: string;
 
   @Expose()

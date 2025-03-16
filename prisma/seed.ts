@@ -79,7 +79,7 @@ async function main() {
       patronymic: 'Smith',
       email: 'staff@university.com',
       passwordHash: PASSWORD_HASH,
-      role: 'STAFF',
+      role: 'UNIVERSITY_STAFF',
       organizationId: university.id,
     },
   });

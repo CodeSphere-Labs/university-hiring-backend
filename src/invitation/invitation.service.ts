@@ -63,7 +63,7 @@ export class InvitationService {
     });
 
     await this.emailService.sendInvitationMail(
-      'nekit.nik2018@yandex.ru',
+      invitationDto.email,
       invite.token,
     );
 

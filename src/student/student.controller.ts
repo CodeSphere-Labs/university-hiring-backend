@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { StudentService } from './student.service';
 import { AddProjectDto } from './dto/add-project.dto';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   UserInterceptor,
   UserInterceptorRequest,
@@ -21,11 +20,6 @@ export class StudentController {
   constructor(private readonly studentService: StudentService) {}
 
   @Post('projects')
-  @ApiOperation({ summary: 'Add a new project to student profile' })
-  @ApiResponse({
-    status: 201,
-    description: 'Project has been successfully added',
-  })
   async addProject(
     @Request() req: UserInterceptorRequest,
     @Body() project: AddProjectDto,

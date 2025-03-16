@@ -137,6 +137,7 @@ enum OrganizationType {
 
 enum Role {
   ADMIN
+  UNIVERSITY_STAFF
   STAFF
   STUDENT
 }

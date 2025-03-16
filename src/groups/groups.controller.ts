@@ -41,19 +41,19 @@ export class GroupsController {
   }
 
   @Post()
-  @Roles(['ADMIN', 'STAFF'])
+  @Roles(['ADMIN', 'UNIVERSITY_STAFF'])
   async create(@Body() createDto: CreateGroupRequestDto) {
     return this.groupsService.createGroup(createDto);
   }
 
   @Post('/addStudent')
-  @Roles(['ADMIN', 'STAFF'])
+  @Roles(['ADMIN', 'UNIVERSITY_STAFF'])
   async addStudentToGroup(@Body() addStudentDto: AddStudentToGroupRequestDto) {
     return this.groupsService.addStudentToGroup(addStudentDto);
   }
 
   @Delete(':id')
-  @Roles(['ADMIN', 'STAFF'])
+  @Roles(['ADMIN', 'UNIVERSITY_STAFF'])
   async delete(@Param('id', ParseIntPipe) id: number) {
     return this.groupsService.delete(id);
   }

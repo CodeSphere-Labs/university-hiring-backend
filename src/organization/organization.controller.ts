@@ -48,6 +48,7 @@ export class OrganizationController {
   }
 
   @Patch()
+  @Roles(['ADMIN', 'STAFF'])
   @UseInterceptors(UserInterceptor)
   async changeOrganization(
     @Req() request: UserInterceptorRequest,
@@ -57,6 +58,7 @@ export class OrganizationController {
   }
 
   @Patch('favorites/:studentId')
+  @Roles(['ADMIN', 'STAFF'])
   @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
   async addFavoriteStudent(
@@ -70,6 +72,7 @@ export class OrganizationController {
   }
 
   @Delete('favorites/:studentId')
+  @Roles(['ADMIN', 'STAFF'])
   @UseInterceptors(UserInterceptor)
   @UseInterceptors(new TransformDataInterceptor(OrganizationResponseDto))
   async removeFavoriteStudent(

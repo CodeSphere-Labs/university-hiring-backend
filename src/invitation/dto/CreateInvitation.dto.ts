@@ -9,8 +9,8 @@ import {
 } from 'class-validator';
 
 export class CreateInvitationDto {
-  @IsOptional()
   @IsNumber()
+  @IsNotEmpty()
   readonly organizationId: number;
 
   @IsOptional()

@@ -19,7 +19,7 @@ export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
 
   @Post('create-invitation')
-  @Roles(['ADMIN', 'STAFF'])
+  @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
   async createStaffInvitation(@Body() invitationDto: CreateInvitationDto) {
     return this.invitationService.createInvitation(invitationDto);
   }

@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 import { UserInterceptorResponse } from 'src/common/interceptors/user.interceptor';
 import { PrismaService } from 'src/database/prisma.service';
 import { CreateOpportunityDto } from 'src/opportunities/dto/create.opportunity.dto';
@@ -73,9 +74,7 @@ export class OpportunitiesService {
     });
 
     if (existingResponse) {
-      throw new ConflictException(
-        'You have already responded to this opportunity.',
-      );
+      throw new ConflictException(ErrorCodes['ALREADY_RESPONDED']);
     }
 
     return await this.prisma.opportunityResponse.create({

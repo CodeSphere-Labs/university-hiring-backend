@@ -2,6 +2,7 @@ import { ArgumentsHost, Catch, HttpStatus } from '@nestjs/common';
 import { BaseExceptionFilter } from '@nestjs/core';
 import { Prisma } from '@prisma/client';
 import { Response } from 'express';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 @Catch(Prisma.PrismaClientKnownRequestError)
 export class PrismaClientExceptionFilter extends BaseExceptionFilter {
@@ -13,12 +14,11 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
 
     switch (exception.code) {
       case 'P2002': {
-        console.error(message);
-
         const status = HttpStatus.CONFLICT;
+
         response.status(status).json({
           statusCode: status,
-          message: 'A record already exists in the database',
+          message: ErrorCodes.code[status],
         });
         break;
       }
@@ -28,7 +28,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
         const status = HttpStatus.BAD_REQUEST;
         response.status(status).json({
           statusCode: status,
-          message: 'Bad request',
+          code: ErrorCodes.code[status],
         });
         break;
       }
@@ -38,7 +38,7 @@ export class PrismaClientExceptionFilter extends BaseExceptionFilter {
         const status = HttpStatus.NOT_FOUND;
         response.status(status).json({
           statusCode: status,
-          message: 'A record is not found in the database',
+          code: ErrorCodes.code[status],
         });
         break;
       }

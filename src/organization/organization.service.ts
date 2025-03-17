@@ -1,10 +1,13 @@
 import {
   BadRequestException,
+  HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/CreateOrganization.dto';
 import { PrismaService } from 'src/database/prisma.service';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 @Injectable()
 export class OrganizationService {
@@ -59,6 +62,18 @@ export class OrganizationService {
   }
 
   async registration(registrationDto: CreateOrganizationDto) {
+    const existOrganization = await this.prisma.organization.findFirst({
+      where: {
+        name: registrationDto.name,
+      },
+    });
+
+    if (existOrganization)
+      throw new HttpException(
+        ErrorCodes['ORGANIZATION_ALREADY_EXISTS'],
+        HttpStatus.CONFLICT,
+      );
+
     const organization = await this.prisma.organization.create({
       data: {
         email: registrationDto.email,
@@ -78,7 +93,7 @@ export class OrganizationService {
     });
 
     if (!organization) {
-      throw new NotFoundException('Organization not found');
+      throw new NotFoundException(ErrorCodes['ORGANIZATION_NOT_FOUND']);
     }
 
     const student = await this.prisma.user.findUnique({
@@ -87,7 +102,7 @@ export class OrganizationService {
     });
 
     if (!student || student.role !== 'STUDENT') {
-      throw new BadRequestException('User is not a student');
+      throw new BadRequestException(ErrorCodes['USER_NOT_STUDENT']);
     }
 
     await this.prisma.organization.update({

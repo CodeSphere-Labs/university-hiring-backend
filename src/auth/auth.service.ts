@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -15,6 +17,7 @@ import { SignUpDto } from 'src/auth/dto/signup.dto';
 import { Role } from '@prisma/client';
 import { CreateInvitationDto } from 'src/invitation/dto/CreateInvitation.dto';
 import { ConfigService } from '@nestjs/config';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 @Injectable()
 export class AuthService {
@@ -67,33 +70,40 @@ export class AuthService {
   }
 
   async signIn(signInDto: SignInDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { email: signInDto.email },
-      include: {
-        organization: true,
-        studentProfile: {
-          include: {
-            group: true,
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email: signInDto.email },
+        include: {
+          organization: true,
+          studentProfile: {
+            include: {
+              group: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    const isPasswordValid = await bcrypt.compare(
-      signInDto.password,
-      user.passwordHash,
-    );
+      const isPasswordValid = await bcrypt.compare(
+        signInDto.password,
+        user.passwordHash,
+      );
 
-    if (!user || !isPasswordValid) {
-      throw new UnauthorizedException('Invalid email or password');
+      if (!user || !isPasswordValid) {
+        throw new UnauthorizedException(ErrorCodes['INVALID_CREDENTIALS']);
+      }
+
+      const tokens = await this.generateAndStoreTokens(
+        user.id,
+        user.email,
+        user.role,
+      );
+      return { user, ...tokens };
+    } catch {
+      throw new HttpException(
+        ErrorCodes['INVALID_CREDENTIALS'],
+        HttpStatus.BAD_REQUEST,
+      );
     }
-
-    const tokens = await this.generateAndStoreTokens(
-      user.id,
-      user.email,
-      user.role,
-    );
-    return { user, ...tokens };
   }
 
   async logout(userId: number) {

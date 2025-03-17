@@ -87,7 +87,11 @@ export class GroupsService {
   }
 
   async createGroup(dto: CreateGroupRequestDto) {
-    return await this.prisma.group.create({ data: dto });
+    return await this.prisma.group.create({
+      data: {
+        name: dto.name.toUpperCase(),
+      },
+    });
   }
 
   async delete(id: number) {

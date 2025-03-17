@@ -4,6 +4,7 @@ import { UpdateUserDto } from 'src/user/dto/user.change.request.dto';
 import { Prisma } from '@prisma/client';
 import { UserInterceptorResponse } from 'src/common/interceptors/user.interceptor';
 import { GetAllUsersDto } from 'src/user/dto/user.all.request.dto';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 @Injectable()
 export class UserService {
@@ -131,7 +132,7 @@ export class UserService {
     });
 
     if (userToDelete.role === user.role) {
-      throw new ForbiddenException('You cannot user with the same role');
+      throw new ForbiddenException(ErrorCodes['FORBIDDEN']);
     }
 
     return await this.prisma.user.delete({ where: { id } });

@@ -8,6 +8,7 @@ import { Response } from 'express';
 import { randomUUID } from 'crypto';
 import { ConfirmInvitationDto } from 'src/invitation/dto/ConfirmInvitation.dto';
 import { EmailService } from 'src/email/email.service';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 @Injectable()
 export class InvitationService {
@@ -24,7 +25,10 @@ export class InvitationService {
 
     if (invitationDto.role === Role.STUDENT) {
       if (!invitationDto.groupId) {
-        throw new HttpException('Group id is required', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          ErrorCodes['GROUP_REQUIRED'],
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       const existingGroup = await this.prisma.group.findUnique({
@@ -32,7 +36,10 @@ export class InvitationService {
       });
 
       if (!existingGroup) {
-        throw new HttpException('Group not found', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          ErrorCodes['GROUP_NOT_FOUND'],
+          HttpStatus.NOT_FOUND,
+        );
       }
     }
 
@@ -41,7 +48,10 @@ export class InvitationService {
     });
 
     if (existingInvitation) {
-      throw new HttpException('User already invited', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        ErrorCodes['USER_ALREADY_INVITED'],
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const existingOrganization = await this.prisma.organization.findUnique({
@@ -51,7 +61,10 @@ export class InvitationService {
     });
 
     if (!existingOrganization) {
-      throw new HttpException('Organization not found', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+        ErrorCodes['ORGANIZATION_NOT_FOUND'],
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     const invite = await this.prisma.invitation.create({
@@ -100,25 +113,31 @@ export class InvitationService {
       });
 
       if (!invitation) {
-        throw new HttpException('Invalid invitation', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          ErrorCodes['INVALID_INVITATION'],
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       if (invitation.used) {
         throw new HttpException(
-          'Invitation already used',
+          ErrorCodes['INVINTATION_USED'],
           HttpStatus.BAD_REQUEST,
         );
       }
 
       if (invitation.expiresAt < new Date()) {
         this.deleteInvitation(invitation.id);
-        throw new HttpException('Invitation epired', HttpStatus.NOT_FOUND);
+        throw new HttpException(
+          ErrorCodes['INVINTATION_EXPIRED'],
+          HttpStatus.NOT_FOUND,
+        );
       }
 
       return invitation;
     } catch {
       throw new HttpException(
-        'Invalid or expired invitation',
+        ErrorCodes['INVALID_INVITATION'],
         HttpStatus.BAD_REQUEST,
       );
     }

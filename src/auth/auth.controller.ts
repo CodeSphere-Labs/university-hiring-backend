@@ -27,23 +27,12 @@ export class AuthController {
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    try {
-      const { accessToken, refreshToken, user } =
-        await this.authService.signIn(signInDto);
+    const { accessToken, refreshToken, user } =
+      await this.authService.signIn(signInDto);
 
-      this.authService.setRefreshTokenCookie(
-        response,
-        refreshToken,
-        accessToken,
-      );
+    this.authService.setRefreshTokenCookie(response, refreshToken, accessToken);
 
-      return user;
-    } catch {
-      throw new HttpException(
-        'Invalid email or password',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    return user;
   }
 
   @Get('refresh-token')

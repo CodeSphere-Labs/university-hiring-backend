@@ -3,6 +3,7 @@ import { PrismaService } from 'src/database/prisma.service';
 import { AddProjectDto } from './dto/add-project.dto';
 import { Prisma } from '@prisma/client';
 import { UuidService } from 'nestjs-uuid';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 @Injectable()
 export class StudentService {
@@ -25,7 +26,7 @@ export class StudentService {
     });
 
     if (!user || !user.studentProfile) {
-      throw new NotFoundException('Student profile not found');
+      throw new NotFoundException(ErrorCodes['STUDENT_PROFILE_NOT_FOUND']);
     }
 
     const currentProjects = (user.studentProfile.projects as any[]) || [];
@@ -82,16 +83,15 @@ export class StudentService {
     });
 
     if (!user || !user.studentProfile) {
-      throw new NotFoundException('Student profile not found');
+      throw new NotFoundException(ErrorCodes['STUDENT_PROFILE_NOT_FOUND']);
     }
 
     const currentProjects = (user.studentProfile.projects as any[]) || [];
 
-    console.log(currentProjects);
     const projectIndex = currentProjects.findIndex((p) => p.id === projectId);
 
     if (projectIndex === -1) {
-      throw new NotFoundException('Project not found');
+      throw new NotFoundException(ErrorCodes['PROJECT_NOT_FOUND']);
     }
 
     const updatedProjects = [...currentProjects];

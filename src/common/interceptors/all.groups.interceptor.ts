@@ -37,7 +37,6 @@ export class AllGroupsInterceptor implements NestInterceptor {
             };
           });
         } catch {
-          console.error('Error transforming data', data);
           return data;
         }
       }),

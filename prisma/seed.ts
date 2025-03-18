@@ -128,6 +128,7 @@ async function main() {
       githubLink: 'https://github.com/alex-johnson',
       projects: [
         {
+          id: 'ai',
           name: 'AI Chat Bot',
           description: 'Чат-бот на основе машинного обучения',
           githubUrl: 'https://github.com/alex-johnson/ai-chat-bot',
@@ -135,6 +136,7 @@ async function main() {
           technologies: ['Python', 'TensorFlow', 'React', 'Node.js'],
         },
         {
+          id: 'web',
           name: 'Web Portfolio',
           description: 'Персональный сайт-портфолио',
           githubUrl: 'https://github.com/alex-johnson/portfolio',

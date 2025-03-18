@@ -3,6 +3,7 @@ import {
   Controller,
   Post,
   Query,
+  Req,
   Res,
   UseInterceptors,
 } from '@nestjs/common';
@@ -13,15 +14,26 @@ import { ConfirmInvitationDto } from 'src/invitation/dto/ConfirmInvitation.dto';
 import type { Response } from 'express';
 import { ResponseUserDto } from 'src/common/baseDto/responseUser.dto';
 import { TransformDataInterceptor } from 'src/common/transform.data';
+import {
+  UserInterceptor,
+  UserInterceptorRequest,
+} from 'src/common/interceptors/user.interceptor';
 
-@Controller('invitation')
+@Controller('invitations')
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
 
   @Post('create-invitation')
+  @UseInterceptors(UserInterceptor)
   @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
-  async createStaffInvitation(@Body() invitationDto: CreateInvitationDto) {
-    return this.invitationService.createInvitation(invitationDto);
+  async createStaffInvitation(
+    @Req() request: UserInterceptorRequest,
+    @Body() invitationDto: CreateInvitationDto,
+  ) {
+    return this.invitationService.createInvitation(
+      invitationDto,
+      request.user.id,
+    );
   }
 
   @Post('confirm-invitation')

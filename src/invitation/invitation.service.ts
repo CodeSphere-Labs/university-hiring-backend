@@ -18,7 +18,7 @@ export class InvitationService {
     private readonly emailService: EmailService,
   ) {}
 
-  async createInvitation(invitationDto: CreateInvitationDto) {
+  async createInvitation(invitationDto: CreateInvitationDto, userId: number) {
     const token = await this.generateToken();
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 24);
@@ -72,6 +72,7 @@ export class InvitationService {
         ...invitationDto,
         token,
         expiresAt,
+        createdById: userId,
       },
     });
 

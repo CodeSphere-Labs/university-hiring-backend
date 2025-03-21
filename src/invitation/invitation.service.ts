@@ -107,6 +107,58 @@ export class InvitationService {
     return updatedUser;
   }
 
+  async getInvitationStats(userId: number) {
+    const totalInvitations = await this.prisma.invitation.count({
+      where: { createdById: userId },
+    });
+
+    const acceptedInvitations = await this.prisma.invitation.count({
+      where: { createdById: userId, used: true },
+    });
+
+    const pendingInvitations = await this.prisma.invitation.count({
+      where: {
+        createdById: userId,
+        used: false,
+        expiresAt: { gte: new Date() },
+      },
+    });
+    const expiredInvitations = await this.prisma.invitation.count({
+      where: {
+        createdById: userId,
+        used: false,
+        expiresAt: { lt: new Date() },
+      },
+    });
+
+    return [
+      {
+        label: 'Все приглашения',
+        stats: totalInvitations,
+        color: 'blue',
+        icon: 'all',
+      },
+      {
+        label: 'Принятые приглашения',
+        stats: acceptedInvitations,
+        color: 'teal',
+        icon: 'accept',
+      },
+      {
+        label: 'В ожидании',
+        stats: pendingInvitations,
+        color: 'gray',
+        icon: 'wait',
+      },
+      {
+        label: 'Истекшие приглашения',
+        stats: expiredInvitations,
+        color: 'red',
+        icon: 'expired',
+      },
+    ];
+  }
+
   private async verifyInvitationToken(token: string) {
     try {
       const invitation = await this.prisma.invitation.findUnique({

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Post,
   Query,
   Req,
@@ -22,6 +23,13 @@ import {
 @Controller('invitations')
 export class InvitationController {
   constructor(private readonly invitationService: InvitationService) {}
+
+  @Get('stats')
+  @UseInterceptors(UserInterceptor)
+  @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
+  async getInvitationStats(@Req() request: UserInterceptorRequest) {
+    return this.invitationService.getInvitationStats(request.user.id);
+  }
 
   @Post('create-invitation')
   @UseInterceptors(UserInterceptor)

@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import { ConfirmInvitationDto } from 'src/invitation/dto/ConfirmInvitation.dto';
 import { EmailService } from 'src/email/email.service';
 import { ErrorCodes } from 'src/common/enums/error-codes';
+import { UserInterceptorResponse } from 'src/common/interceptors/user.interceptor';
 
 @Injectable()
 export class InvitationService {
@@ -107,7 +108,22 @@ export class InvitationService {
     return updatedUser;
   }
 
-  async getInvitationStats(userId: number) {
+  async getInvitationStats(
+    user: UserInterceptorResponse,
+    filter: 'createdByMe' | 'all',
+  ) {
+    if (filter === 'all') {
+      if (user.role !== Role.ADMIN) {
+        throw new HttpException(ErrorCodes['FORBIDDEN'], HttpStatus.FORBIDDEN);
+      }
+
+      return this.getInvitationStatsForAdmin();
+    }
+
+    return this.getInvitationStatsForUser(user.id);
+  }
+
+  private async getInvitationStatsForUser(userId: number) {
     const totalInvitations = await this.prisma.invitation.count({
       where: { createdById: userId },
     });
@@ -136,25 +152,148 @@ export class InvitationService {
         label: 'Все приглашения',
         stats: totalInvitations,
         color: 'blue',
-        icon: 'all',
+        status: 'all',
       },
       {
         label: 'Принятые приглашения',
         stats: acceptedInvitations,
         color: 'teal',
-        icon: 'accept',
+        status: 'accept',
       },
       {
         label: 'В ожидании',
         stats: pendingInvitations,
         color: 'gray',
-        icon: 'wait',
+        status: 'wait',
       },
       {
         label: 'Истекшие приглашения',
         stats: expiredInvitations,
         color: 'red',
-        icon: 'expired',
+        status: 'expired',
+      },
+    ];
+  }
+
+  async getInvitations(
+    user: UserInterceptorResponse,
+    filter: 'createdByMe' | 'all' = 'createdByMe',
+    status: 'all' | 'accept' | 'wait' | 'expired' = 'all',
+    page: number = 1,
+    limit: number = 10,
+  ) {
+    if (filter === 'all' && user.role !== Role.ADMIN) {
+      throw new HttpException(ErrorCodes['FORBIDDEN'], HttpStatus.FORBIDDEN);
+    }
+
+    const skip = (page - 1) * limit;
+
+    const whereCondition: any = {};
+
+    if (filter === 'createdByMe') {
+      whereCondition.createdById = user.id;
+    }
+
+    switch (status) {
+      case 'accept':
+        whereCondition.used = true;
+        break;
+      case 'wait':
+        whereCondition.used = false;
+        whereCondition.expiresAt = { gte: new Date() };
+        break;
+      case 'expired':
+        whereCondition.used = false;
+        whereCondition.expiresAt = { lt: new Date() };
+        break;
+    }
+
+    const invitations = await this.prisma.invitation.findMany({
+      where: whereCondition,
+      skip,
+      take: limit,
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        organization: true,
+        group: true,
+        ...(filter === 'all' && {
+          createdBy: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              role: true,
+            },
+          },
+        }),
+      },
+    });
+
+    const total = await this.prisma.invitation.count({
+      where: whereCondition,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: invitations,
+      meta: {
+        page,
+        limit,
+        totalItems: total,
+        totalPages,
+      },
+    };
+  }
+
+  private async getInvitationStatsForAdmin() {
+    const totalInvitations = await this.prisma.invitation.count();
+
+    const acceptedInvitations = await this.prisma.invitation.count({
+      where: { used: true },
+    });
+
+    const pendingInvitations = await this.prisma.invitation.count({
+      where: {
+        used: false,
+        expiresAt: { gte: new Date() },
+      },
+    });
+
+    const expiredInvitations = await this.prisma.invitation.count({
+      where: {
+        used: false,
+        expiresAt: { lt: new Date() },
+      },
+    });
+
+    return [
+      {
+        label: 'Все приглашения',
+        stats: totalInvitations,
+        color: 'blue',
+        status: 'all',
+      },
+      {
+        label: 'Принятые приглашения',
+        stats: acceptedInvitations,
+        color: 'teal',
+        status: 'accept',
+      },
+      {
+        label: 'В ожидании',
+        stats: pendingInvitations,
+        color: 'gray',
+        status: 'wait',
+      },
+      {
+        label: 'Истекшие приглашения',
+        stats: expiredInvitations,
+        color: 'red',
+        status: 'expired',
       },
     ];
   }

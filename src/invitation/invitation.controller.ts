@@ -7,6 +7,8 @@ import {
   Req,
   Res,
   UseInterceptors,
+  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { Roles } from 'src/common/guards/role.guard';
 import { InvitationService } from './invitation.service';
@@ -19,6 +21,7 @@ import {
   UserInterceptor,
   UserInterceptorRequest,
 } from 'src/common/interceptors/user.interceptor';
+import { ResponseInvitationDto } from './dto/ResponseInvitationDto';
 
 @Controller('invitations')
 export class InvitationController {
@@ -27,8 +30,31 @@ export class InvitationController {
   @Get('stats')
   @UseInterceptors(UserInterceptor)
   @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
-  async getInvitationStats(@Req() request: UserInterceptorRequest) {
-    return this.invitationService.getInvitationStats(request.user.id);
+  async getInvitationStats(
+    @Req() request: UserInterceptorRequest,
+    @Query('filter') filter: 'createdByMe' | 'all' = 'createdByMe',
+  ) {
+    return this.invitationService.getInvitationStats(request.user, filter);
+  }
+
+  @Get()
+  @UseInterceptors(UserInterceptor)
+  @UseInterceptors(new TransformDataInterceptor(ResponseInvitationDto))
+  @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
+  async getInvitations(
+    @Req() request: UserInterceptorRequest,
+    @Query('filter') filter: 'createdByMe' | 'all' = 'createdByMe',
+    @Query('status') status: 'all' | 'accept' | 'wait' | 'expired' = 'all',
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.invitationService.getInvitations(
+      request.user,
+      filter,
+      status,
+      page,
+      limit,
+    );
   }
 
   @Post('create-invitation')

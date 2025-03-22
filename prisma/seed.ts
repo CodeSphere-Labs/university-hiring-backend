@@ -6,7 +6,6 @@ const PASSWORD_HASH =
   '$2b$10$pRMWOouBcx7YE2FqffF7KucxvTxxs9/iuITDPjlU5QiO1AVZg3YMa';
 
 async function main() {
-  // Создаем организации
   const university = await prisma.organization.upsert({
     where: { email: 'university@example.com' },
     update: {},
@@ -31,14 +30,12 @@ async function main() {
     },
   });
 
-  // Создаем скиллы
   for (const skill of skills) {
     await prisma.skill.create({
       data: skill,
     });
   }
 
-  // Создаем группы
   const group1 = await prisma.group.upsert({
     where: { name: 'ПИ-101' },
     update: {},
@@ -55,7 +52,6 @@ async function main() {
     },
   });
 
-  // Создаем админа
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
@@ -69,7 +65,6 @@ async function main() {
     },
   });
 
-  // Создаем сотрудника университета
   await prisma.user.upsert({
     where: { email: 'staff@university.com' },
     update: {},
@@ -84,7 +79,6 @@ async function main() {
     },
   });
 
-  // Создаем сотрудника компании
   await prisma.user.upsert({
     where: { email: 'hr@company.com' },
     update: {},
@@ -99,7 +93,6 @@ async function main() {
     },
   });
 
-  // Создаем студента с заполненным профилем
   const studentWithProfile = await prisma.user.upsert({
     where: { email: 'student1@example.com' },
     update: {},
@@ -117,7 +110,6 @@ async function main() {
     },
   });
 
-  // Создаем профиль для первого студента
   await prisma.studentProfile.upsert({
     where: { userId: studentWithProfile.id },
     update: {},
@@ -145,18 +137,11 @@ async function main() {
         },
       ],
       skills: {
-        connect: [
-          { id: 1 }, // JavaScript
-          { id: 2 }, // Python
-          { id: 3 }, // React
-          { id: 4 }, // Node.js
-          { id: 5 }, // TypeScript
-        ],
+        connect: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
       },
     },
   });
 
-  // Создаем студента без заполненного профиля
   const studentWithoutProfile = await prisma.user.upsert({
     where: { email: 'student2@example.com' },
     update: {},
@@ -171,7 +156,6 @@ async function main() {
     },
   });
 
-  // Создаем минимальный профиль для второго студента
   await prisma.studentProfile.upsert({
     where: { userId: studentWithoutProfile.id },
     update: {},
@@ -181,7 +165,6 @@ async function main() {
     },
   });
 
-  // Добавляем первого студента в избранное компании
   await prisma.organization.update({
     where: { id: company.id },
     data: {
@@ -191,7 +174,6 @@ async function main() {
     },
   });
 
-  // Создаем тестовую вакансию
   const createdSkills = await prisma.skill.findMany({
     take: 3,
   });
@@ -206,6 +188,113 @@ async function main() {
       },
     },
   });
+
+  const uniStaff = await prisma.user.findUnique({
+    where: { email: 'staff@university.com' },
+  });
+
+  const companyStaff = await prisma.user.findUnique({
+    where: { email: 'hr@company.com' },
+  });
+
+  console.log('Создание тестовых приглашений...');
+
+  const now = new Date();
+
+  const invitationData = [];
+
+  for (let i = 0; i < 50; i++) {
+    const daysAgo = Math.floor(Math.random() * 180);
+    const createdAt = new Date(now);
+    createdAt.setDate(createdAt.getDate() - daysAgo);
+
+    const expiresAt = new Date(createdAt);
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    const role =
+      i % 3 === 0 ? 'STUDENT' : i % 3 === 1 ? 'STAFF' : 'UNIVERSITY_STAFF';
+    const creatorId = i % 2 === 0 ? uniStaff.id : companyStaff.id;
+    const organizationId = i % 2 === 0 ? 1 : 2;
+
+    const email = `invite_accepted_${i}@example.com`;
+
+    invitationData.push({
+      email,
+      token: `token_accepted_${i}`,
+      role,
+      organizationId,
+      used: true,
+      expiresAt,
+      createdAt,
+      createdById: creatorId,
+      groupId: role === 'STUDENT' ? (i % 2 === 0 ? 1 : 2) : null,
+    });
+  }
+
+  for (let i = 0; i < 50; i++) {
+    const daysAgo = Math.floor(Math.random() * 3);
+    const createdAt = new Date(now);
+    createdAt.setDate(createdAt.getDate() - daysAgo);
+
+    const daysValid = 4 + Math.floor(Math.random() * 4);
+    const expiresAt = new Date(now);
+    expiresAt.setDate(expiresAt.getDate() + daysValid);
+
+    const role =
+      i % 3 === 0 ? 'STUDENT' : i % 3 === 1 ? 'STAFF' : 'UNIVERSITY_STAFF';
+    const creatorId = i % 2 === 0 ? uniStaff.id : companyStaff.id;
+    const organizationId = i % 2 === 0 ? 1 : 2;
+
+    const email = `invite_waiting_${i}@example.com`;
+
+    invitationData.push({
+      email,
+      token: `token_waiting_${i}`,
+      role,
+      organizationId,
+      used: false,
+      expiresAt,
+      createdAt,
+      createdById: creatorId,
+      groupId: role === 'STUDENT' ? (i % 2 === 0 ? 1 : 2) : null,
+    });
+  }
+
+  for (let i = 0; i < 100; i++) {
+    const daysAgo = 10 + Math.floor(Math.random() * 170);
+    const createdAt = new Date(now);
+    createdAt.setDate(createdAt.getDate() - daysAgo);
+
+    const validDays = 2 + Math.floor(Math.random() * 8);
+    const expiresAt = new Date(createdAt);
+    expiresAt.setDate(expiresAt.getDate() + validDays);
+
+    const role =
+      i % 3 === 0 ? 'STUDENT' : i % 3 === 1 ? 'STAFF' : 'UNIVERSITY_STAFF';
+    const creatorId = i % 2 === 0 ? uniStaff.id : companyStaff.id;
+    const organizationId = i % 2 === 0 ? 1 : 2;
+
+    const email = `invite_expired_${i}@example.com`;
+
+    invitationData.push({
+      email,
+      token: `token_expired_${i}`,
+      role,
+      organizationId,
+      used: false,
+      expiresAt,
+      createdAt,
+      createdById: creatorId,
+      groupId: role === 'STUDENT' ? (i % 2 === 0 ? 1 : 2) : null,
+    });
+  }
+
+  await prisma.invitation.createMany({
+    data: invitationData,
+    skipDuplicates: true,
+  });
+
+  console.log(`Создано ${invitationData.length} тестовых приглашений`);
 }
 
 main()

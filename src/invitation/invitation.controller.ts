@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   ParseIntPipe,
   DefaultValuePipe,
+  Patch,
 } from '@nestjs/common';
 import { Roles } from 'src/common/guards/role.guard';
 import { InvitationService } from './invitation.service';
@@ -81,6 +82,21 @@ export class InvitationController {
       confirmInvitationDto,
       token,
       response,
+    );
+  }
+
+  @Patch('refresh-invitation')
+  @UseInterceptors(UserInterceptor)
+  @UseInterceptors(new TransformDataInterceptor(ResponseInvitationDto))
+  @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
+  async updateInvitation(
+    @Body() updateInvitationDto: CreateInvitationDto,
+    @Req() request: UserInterceptorRequest,
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+    return this.invitationService.updateInvitation(
+      updateInvitationDto,
+      request.user,
     );
   }
 }

@@ -48,6 +48,16 @@ export class InvitationService {
       where: { email: invitationDto.email },
     });
 
+    const expired =
+      existingInvitation && existingInvitation.expiresAt < new Date();
+
+    if (existingInvitation && expired) {
+      throw new HttpException(
+        ErrorCodes['INVINTATION_EXPIRED'],
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
     if (existingInvitation) {
       throw new HttpException(
         ErrorCodes['USER_ALREADY_INVITED'],
@@ -121,6 +131,67 @@ export class InvitationService {
     }
 
     return this.getInvitationStatsForUser(user.id);
+  }
+
+  async updateInvitation(
+    updateInvitationDto: CreateInvitationDto,
+    user: UserInterceptorResponse,
+  ) {
+    const invitation = await this.prisma.invitation.findFirst({
+      where: { email: updateInvitationDto.email },
+    });
+
+    if (!invitation) {
+      throw new HttpException(
+        ErrorCodes['INVITATION_NOT_FOUND'],
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (user.role !== Role.ADMIN && invitation.createdById !== user.id) {
+      throw new HttpException(ErrorCodes['FORBIDDEN'], HttpStatus.FORBIDDEN);
+    }
+
+    if (invitation.used) {
+      throw new HttpException(
+        ErrorCodes['INVINTATION_USED'],
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    const updatedInvitation = await this.prisma.invitation.update({
+      where: { id: invitation.id },
+      data: {
+        email: updateInvitationDto.email,
+        role: updateInvitationDto.role,
+        organizationId: updateInvitationDto.organizationId,
+        groupId: updateInvitationDto.groupId,
+        expiresAt,
+      },
+      include: {
+        organization: true,
+        group: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    await this.emailService.sendInvitationMail(
+      updateInvitationDto.email,
+      updatedInvitation.token,
+    );
+
+    return { inviteToken: updatedInvitation.token, message: 'Email send' };
   }
 
   private async getInvitationStatsForUser(userId: number) {

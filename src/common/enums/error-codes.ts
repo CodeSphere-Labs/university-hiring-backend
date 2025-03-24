@@ -27,6 +27,7 @@ export const ErrorCodes = {
   INVALID_INVITATION: 'invalid_invitation',
   INVINTATION_USED: 'invintation_used',
   INVINTATION_EXPIRED: 'invintation_expired',
+  INVITATION_NOT_FOUND: 'invitation_not_found',
 
   // Organization related
   ORGANIZATION_NOT_FOUND: 'organization_not_found',

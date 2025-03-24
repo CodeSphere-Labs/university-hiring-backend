@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
   Query,
   Req,
@@ -22,7 +24,10 @@ import {
   UserInterceptor,
   UserInterceptorRequest,
 } from 'src/common/interceptors/user.interceptor';
-import { ResponseInvitationDto } from './dto/ResponseInvitationDto';
+import {
+  InvitationDto,
+  ResponseInvitationDto,
+} from './dto/ResponseInvitationDto';
 
 @Controller('invitations')
 export class InvitationController {
@@ -87,16 +92,36 @@ export class InvitationController {
 
   @Patch('refresh-invitation')
   @UseInterceptors(UserInterceptor)
-  @UseInterceptors(new TransformDataInterceptor(ResponseInvitationDto))
   @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
   async updateInvitation(
     @Body() updateInvitationDto: CreateInvitationDto,
     @Req() request: UserInterceptorRequest,
   ) {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
     return this.invitationService.updateInvitation(
       updateInvitationDto,
       request.user,
     );
+  }
+
+  @Patch('refresh-invitation/:id')
+  @UseInterceptors(UserInterceptor)
+  @UseInterceptors(new TransformDataInterceptor(InvitationDto))
+  @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
+  async updateInvitationById(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: UserInterceptorRequest,
+  ) {
+    return this.invitationService.updateInvitationById(id, request.user);
+  }
+
+  @Delete(':id')
+  @UseInterceptors(UserInterceptor)
+  @UseInterceptors(new TransformDataInterceptor(InvitationDto))
+  @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])
+  async deleteInvitation(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() request: UserInterceptorRequest,
+  ) {
+    return this.invitationService.deleteInvitationById(id, request.user);
   }
 }

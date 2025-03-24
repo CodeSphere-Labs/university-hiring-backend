@@ -19,7 +19,8 @@ class CreatedByDto {
   role: Role;
 }
 
-class InvitationDto {
+@Exclude()
+export class InvitationDto {
   @Expose()
   id: number;
 

@@ -191,7 +191,110 @@ export class InvitationService {
       updatedInvitation.token,
     );
 
-    return { inviteToken: updatedInvitation.token, message: 'Email send' };
+    return { message: 'Email send' };
+  }
+
+  async updateInvitationById(id: number, user: UserInterceptorResponse) {
+    const invitation = await this.prisma.invitation.findFirst({
+      where: { id },
+    });
+
+    if (!invitation) {
+      throw new HttpException(
+        ErrorCodes['INVITATION_NOT_FOUND'],
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (user.role !== Role.ADMIN && invitation.createdById !== user.id) {
+      throw new HttpException(ErrorCodes['FORBIDDEN'], HttpStatus.FORBIDDEN);
+    }
+
+    if (invitation.used) {
+      throw new HttpException(
+        ErrorCodes['INVINTATION_USED'],
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24);
+
+    const updatedInvitation = await this.prisma.invitation.update({
+      where: { id },
+      data: {
+        expiresAt,
+      },
+      include: {
+        organization: true,
+        group: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    await this.emailService.sendInvitationMail(
+      updatedInvitation.email,
+      updatedInvitation.token,
+    );
+
+    return updatedInvitation;
+  }
+
+  async deleteInvitationById(id: number, user: UserInterceptorResponse) {
+    const invitation = await this.prisma.invitation.findUnique({
+      where: { id },
+      include: {
+        organization: true,
+        group: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!invitation) {
+      throw new HttpException(
+        ErrorCodes['INVITATION_NOT_FOUND'],
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (user.role !== Role.ADMIN && invitation.createdById !== user.id) {
+      throw new HttpException(ErrorCodes['FORBIDDEN'], HttpStatus.FORBIDDEN);
+    }
+
+    const deletedInvitation = await this.prisma.invitation.delete({
+      where: { id },
+      include: {
+        organization: true,
+        group: true,
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+          },
+        },
+      },
+    });
+
+    return deletedInvitation;
   }
 
   private async getInvitationStatsForUser(userId: number) {
@@ -284,7 +387,7 @@ export class InvitationService {
       skip,
       take: limit,
       orderBy: {
-        createdAt: 'desc',
+        updatedAt: 'desc',
       },
       include: {
         organization: true,

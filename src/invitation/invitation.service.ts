@@ -395,7 +395,7 @@ export class InvitationService {
       skip,
       take: limit,
       orderBy: {
-        createdAt: 'desc',
+        updatedAt: 'desc',
       },
       include: {
         organization: true,

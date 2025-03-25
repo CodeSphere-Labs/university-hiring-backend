@@ -355,6 +355,7 @@ export class InvitationService {
     status: 'all' | 'accept' | 'wait' | 'expired' = 'all',
     page: number = 1,
     limit: number = 10,
+    search?: string,
   ) {
     if (filter === 'all' && user.role !== Role.ADMIN) {
       throw new HttpException(ErrorCodes['FORBIDDEN'], HttpStatus.FORBIDDEN);
@@ -366,6 +367,13 @@ export class InvitationService {
 
     if (filter === 'createdByMe') {
       whereCondition.createdById = user.id;
+    }
+
+    if (search) {
+      whereCondition.email = {
+        contains: search,
+        mode: 'insensitive',
+      };
     }
 
     switch (status) {
@@ -387,7 +395,7 @@ export class InvitationService {
       skip,
       take: limit,
       orderBy: {
-        updatedAt: 'desc',
+        createdAt: 'desc',
       },
       include: {
         organization: true,

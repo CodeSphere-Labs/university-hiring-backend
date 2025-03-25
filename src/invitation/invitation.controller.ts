@@ -53,6 +53,7 @@ export class InvitationController {
     @Query('status') status: 'all' | 'accept' | 'wait' | 'expired' = 'all',
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
   ) {
     return this.invitationService.getInvitations(
       request.user,
@@ -60,6 +61,7 @@ export class InvitationController {
       status,
       page,
       limit,
+      search,
     );
   }
 

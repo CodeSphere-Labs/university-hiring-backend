@@ -19,9 +19,6 @@ export class AllGroupsInterceptor implements NestInterceptor {
               students: group.students.map((student) => {
                 return {
                   id: student.user.id,
-                  resume: student.resume,
-                  githubLink: student.githubLink,
-                  projects: student.projects,
                   firstName: student.user.firstName,
                   lastName: student.user.lastName,
                   patronymic: student.user.patronymic,
@@ -31,7 +28,10 @@ export class AllGroupsInterceptor implements NestInterceptor {
                   telegramLink: student.user.telegramLink,
                   vkLink: student.user.vkLink,
                   role: student.user.role,
+                  createdAt: student.user.createdAt,
+                  updatedAt: student.user.updatedAt,
                   organization: student.user.organization,
+                  studentProfile: student.user.studentProfile,
                 };
               }),
             };

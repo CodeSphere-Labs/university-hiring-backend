@@ -1,59 +1,135 @@
-# 🏫 Organization Registration and Invitation System
+# 🎓 University Management System API
 
-A Prisma-based backend system that supports registration of organizations (companies and universities) and allows for user invitations to streamline the registration process.
+## 📋 Overview
+A comprehensive API system designed for managing university-related processes, including student registration, invitation management, and organizational structure handling.
 
-## 📋 Features
-- **Organization Registration**: Allows companies and universities to register and manage information.
-- **User Management**: Assigns roles and relationships within each organization.
-- **Invitation System**: Allows organization admins to generate unique, one-time registration links for new members.
+## ✨ Key Features
+- 👥 User Management
+  - Multiple user roles (Admin, Staff, University Staff, Student)
+  - Profile management with skills tracking
+  - Student portfolio management
 
-## 📂 Project Structure
-- **Prisma Models**:
-  - **Organization**: Stores basic info about companies/universities.
-  - **User**: Stores user details, including hashed passwords and assigned roles.
-  - **Invitation**: Handles unique tokens for user invitations with expiration settings.
-- **Enums**:
-  - **OrganizationType**: Defines organization types (`COMPANY`, `UNIVERSITY`).
-  - **Role**: Defines user roles (`ADMIN`, `STAFF`, `STUDENT`).
+- 📨 Invitation System
+  - Create and manage invitations
+  - Role-based invitation creation
+  - Automatic expiration handling
+  - Email notifications
+  - Advanced filtering and search capabilities
+
+- 🏢 Organization Management
+  - Multi-organization support
+  - Group management within organizations
+  - Hierarchical structure
+
+- 🎯 Skills Management
+  - Skill categorization
+  - Multi-language support (Russian/English)
+  - User skill tracking
+
+- 📚 Student Projects
+  - Project portfolio management
+  - GitHub integration
+  - Technology stack tracking
+
+## 🛠 Technical Stack
+- **Framework**: NestJS
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: JWT
+- **Documentation**: Swagger/OpenAPI
+- **Email Service**: Integrated email notifications
+- **Validation**: Class-validator & class-transformer
+
+## 📝 API Documentation
+
+### 🔐 Authentication Endpoints
+- `POST /auth/signup` - User registration
+- `POST /auth/signin` - User login
+- `POST /auth/refresh` - Refresh access token
+
+### 📨 Invitation Management
+- `GET /invitations` - List all invitations with filtering
+- `POST /invitations/create-invitation` - Create new invitation
+- `POST /invitations/confirm-invitation` - Confirm invitation
+- `PATCH /invitations/refresh-invitation` - Update invitation
+- `DELETE /invitations/:id` - Delete invitation
+
+### 👥 User Management
+- `GET /users/profile` - Get user profile
+- `PATCH /users/profile` - Update user profile
+- `GET /users/skills` - Get user skills
+
+### 👨‍🎓 Student Features
+- `POST /students/projects` - Add student project
+- `GET /students/projects` - Get student projects
+- `DELETE /students/projects/:id` - Delete project
+
+## 🔍 Query Parameters
+### Invitation Filtering
+- `filter`: 'createdByMe' | 'all'
+- `status`: 'all' | 'accept' | 'wait' | 'expired'
+- `search`: Search by email
+- `page`: Pagination page number
+- `limit`: Items per page
+
+## 🔒 Security
+- JWT-based authentication
+- Role-based access control
+- Request validation
+- Error handling with custom error codes
+
+## 💡 Features Highlights
+- Real-time email notifications
+- Automatic invitation expiration
+- Case-insensitive search
+- Pagination support
+- Comprehensive error handling
+- Data transformation interceptors
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** (v18 or higher)
-- **PostgreSQL** for the database
-- **Prisma CLI**
+```bash
+node >= 14.x
+npm >= 6.x
+postgresql >= 12
+```
 
 ### Installation
-1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/CodeSphere-Labs/university-hiring-backend.git
-    cd university-hiring-backend
-    ```
+```bash
+# Clone the repository
+git clone https://github.com/CodeSphere-Labs/university-hiring-backend.git
 
-2. **Install dependencies**:
-    ```bash
-    yarn
-    ```
+# Install dependencies
+npm install
 
-3. **Setup environment variables**: Rename `.env.example` to `.env` and update the `DATABASE_URL` with your PostgreSQL connection string.
+# Setup environment variables
+cp .env.example .env
 
-4. **Run Prisma migrations**:
-    ```bash
-    npx prisma migrate dev --name init
-    ```
+# Run database migrations
+npm run prisma:migrate
 
-5. **Generate Prisma Client**:
-    ```bash
-    npx prisma generate
-    ```
-
-6. **Start the application**:
-    ```bash
-    yarn dev
-    ```
+# Start the application
+npm run start:dev
+```
 
 ### Environment Variables
-Make sure you have the following in your `.env` file:
-
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/database_name"
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+JWT_SECRET="your-jwt-secret"
+SMTP_HOST="smtp.example.com"
+SMTP_PORT=587
+SMTP_USER="your-email"
+SMTP_PASSWORD="your-password"
+```
+
+## 📈 Future Improvements
+- [ ] Add WebSocket support for real-time notifications
+- [ ] Implement file upload for student projects
+- [ ] Add analytics dashboard
+- [ ] Enhance search capabilities
+- [ ] Add batch operations for invitations
+
+## 👏 Acknowledgments
+- NestJS team for the amazing framework
+- Prisma team for the excellent ORM
+- All contributors who participated in this project

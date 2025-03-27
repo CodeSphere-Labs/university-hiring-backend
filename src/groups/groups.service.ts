@@ -7,8 +7,18 @@ import { CreateGroupRequestDto } from 'src/groups/dto/create.group.request.dto';
 export class GroupsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAll(withStudents: boolean) {
+  async getAll(withStudents: boolean, search?: string) {
+    const whereCondition: any = {};
+
+    if (search) {
+      whereCondition.name = {
+        contains: search,
+        mode: 'insensitive',
+      };
+    }
+
     return await this.prisma.group.findMany({
+      where: whereCondition,
       include: {
         ...(withStudents && {
           students: {

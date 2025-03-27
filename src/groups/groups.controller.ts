@@ -26,8 +26,9 @@ export class GroupsController {
   async getAll(
     @Query('withStudents', new DefaultValuePipe(false), ParseBoolPipe)
     withStudents: boolean,
+    @Query('search') search?: string,
   ) {
-    return this.groupsService.getAll(withStudents);
+    return this.groupsService.getAll(withStudents, search);
   }
 
   @Get(':id')

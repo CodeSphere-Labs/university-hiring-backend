@@ -102,7 +102,7 @@ export class OpportunitiesService {
   }
 
   async getById(opportunityId: number, withResponses: boolean) {
-    return await this.prisma.opportunity.findUniqueOrThrow({
+    const opportunity = await this.prisma.opportunity.findUniqueOrThrow({
       where: { id: opportunityId },
       ...(withResponses && {
         include: {
@@ -124,6 +124,8 @@ export class OpportunitiesService {
         },
       }),
     });
+
+    return opportunity;
   }
 
   async delete(opportunityId: number) {

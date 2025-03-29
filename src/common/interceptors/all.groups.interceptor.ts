@@ -12,30 +12,47 @@ export class AllGroupsInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         try {
-          const newData = Array.isArray(data) ? data : [data];
-          return newData.map((group) => {
+          if (!Array.isArray(data)) {
             return {
-              ...group,
-              students: group.students.map((student) => {
-                return {
-                  id: student.user.id,
-                  firstName: student.user.firstName,
-                  lastName: student.user.lastName,
-                  patronymic: student.user.patronymic,
-                  email: student.user.email,
-                  avatarUrl: student.user.avatarUrl,
-                  aboutMe: student.user.aboutMe,
-                  telegramLink: student.user.telegramLink,
-                  vkLink: student.user.vkLink,
-                  role: student.user.role,
-                  createdAt: student.user.createdAt,
-                  updatedAt: student.user.updatedAt,
-                  organization: student.user.organization,
-                  studentProfile: student.user.studentProfile,
-                };
-              }),
+              ...data,
+              students: data.students?.map((student) => ({
+                id: student.user.id,
+                firstName: student.user.firstName,
+                lastName: student.user.lastName,
+                patronymic: student.user.patronymic,
+                email: student.user.email,
+                avatarUrl: student.user.avatarUrl,
+                aboutMe: student.user.aboutMe,
+                telegramLink: student.user.telegramLink,
+                vkLink: student.user.vkLink,
+                role: student.user.role,
+                createdAt: student.user.createdAt,
+                updatedAt: student.user.updatedAt,
+                organization: student.user.organization,
+                studentProfile: student.user.studentProfile,
+              })),
             };
-          });
+          }
+
+          return data.map((group) => ({
+            ...group,
+            students: group.students.map((student) => ({
+              id: student.user.id,
+              firstName: student.user.firstName,
+              lastName: student.user.lastName,
+              patronymic: student.user.patronymic,
+              email: student.user.email,
+              avatarUrl: student.user.avatarUrl,
+              aboutMe: student.user.aboutMe,
+              telegramLink: student.user.telegramLink,
+              vkLink: student.user.vkLink,
+              role: student.user.role,
+              createdAt: student.user.createdAt,
+              updatedAt: student.user.updatedAt,
+              organization: student.user.organization,
+              studentProfile: student.user.studentProfile,
+            })),
+          }));
         } catch {
           return data;
         }

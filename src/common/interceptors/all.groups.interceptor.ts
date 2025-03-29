@@ -29,7 +29,12 @@ export class AllGroupsInterceptor implements NestInterceptor {
                 createdAt: student.user.createdAt,
                 updatedAt: student.user.updatedAt,
                 organization: student.user.organization,
-                studentProfile: student.user.studentProfile,
+                studentProfile: {
+                  ...student.user.studentProfile,
+                  skills: student.user.studentProfile.skills.map(
+                    (skill) => skill.name,
+                  ),
+                },
               })),
             };
           }
@@ -50,7 +55,12 @@ export class AllGroupsInterceptor implements NestInterceptor {
               createdAt: student.user.createdAt,
               updatedAt: student.user.updatedAt,
               organization: student.user.organization,
-              studentProfile: student.user.studentProfile,
+              studentProfile: {
+                ...student.user.studentProfile,
+                skills: student.user.studentProfile.skills.map(
+                  (skill) => skill.name,
+                ),
+              },
             })),
           }));
         } catch {

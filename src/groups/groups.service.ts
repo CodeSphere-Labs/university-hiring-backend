@@ -37,7 +37,7 @@ export class GroupsService {
   }
 
   async getById(id: number, withStudents: boolean) {
-    return await this.prisma.group.findUniqueOrThrow({
+    const group = await this.prisma.group.findUniqueOrThrow({
       where: { id },
       include: {
         ...(withStudents && {
@@ -45,7 +45,11 @@ export class GroupsService {
             include: {
               user: {
                 include: {
-                  studentProfile: true,
+                  studentProfile: {
+                    include: {
+                      skills: true,
+                    },
+                  },
                   organization: true,
                 },
               },
@@ -54,6 +58,10 @@ export class GroupsService {
         }),
       },
     });
+
+    console.log(group.students[0]);
+
+    return group;
   }
 
   async addStudentToGroup(dto: AddStudentToGroupRequestDto) {

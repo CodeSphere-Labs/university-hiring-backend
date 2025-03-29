@@ -31,6 +31,7 @@ export const ErrorCodes = {
 
   // Organization related
   ORGANIZATION_NOT_FOUND: 'organization_not_found',
+  YOUR_ORGANIZATION_NOT_FOUND: 'your_organization_not_found',
   ORGANIZATION_ALREADY_EXISTS: 'organization_already_exists',
   ORGANIZATION_DISABLED: 'organization_disabled',
 

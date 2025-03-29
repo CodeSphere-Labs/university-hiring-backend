@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -49,6 +50,10 @@ export class OpportunitiesService {
         },
       });
       skillIds = foundSkills.map((skill) => ({ id: skill.id }));
+    }
+
+    if (user.organizationId === null) {
+      throw new BadRequestException(ErrorCodes['YOUR_ORGANIZATION_NOT_FOUND']);
     }
 
     return await this.prisma.opportunity.create({

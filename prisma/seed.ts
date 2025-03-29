@@ -30,6 +30,18 @@ async function main() {
     },
   });
 
+  const companyForAdmin = await prisma.organization.upsert({
+    where: { email: 'companyforadmin@example.com' },
+    update: {},
+    create: {
+      name: 'Admin Tech Company',
+      type: OrganizationType.COMPANY,
+      email: 'companyforadmin@example.com',
+      websiteUrl: 'https://companyforadmin.example.com',
+      about: 'A sample admin tech company for testing',
+    },
+  });
+
   for (const skill of skills) {
     await prisma.skill.create({
       data: skill,
@@ -62,6 +74,7 @@ async function main() {
       email: 'admin@example.com',
       passwordHash: PASSWORD_HASH,
       role: 'ADMIN',
+      organizationId: companyForAdmin.id,
     },
   });
 

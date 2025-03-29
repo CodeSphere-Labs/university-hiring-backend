@@ -37,9 +37,19 @@ export class OpportunitiesService {
   }
 
   async create(dto: CreateOpportunityDto, user: UserInterceptorResponse) {
-    const { title, description, skillIds } = dto;
+    const { title, description, skills } = dto;
 
-    const skillConnections = skillIds.map((id) => ({ id }));
+    let skillIds: { id: number }[] = [];
+    if (skills && skills.length > 0) {
+      const foundSkills = await this.prisma.skill.findMany({
+        where: {
+          name: {
+            in: skills,
+          },
+        },
+      });
+      skillIds = foundSkills.map((skill) => ({ id: skill.id }));
+    }
 
     return await this.prisma.opportunity.create({
       data: {
@@ -47,7 +57,7 @@ export class OpportunitiesService {
         description,
         organizationId: user.organizationId,
         requiredSkills: {
-          connect: skillConnections,
+          connect: skillIds,
         },
       },
     });

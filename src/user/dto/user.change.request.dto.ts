@@ -9,6 +9,22 @@ import {
 } from 'class-validator';
 
 export class UpdateUserDto {
+  @IsString()
+  @IsNotEmpty()
+  readonly firstName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly lastName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly patronymic: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly email: string;
+
   @IsOptional()
   @IsUrl()
   readonly avatarUrl?: string;

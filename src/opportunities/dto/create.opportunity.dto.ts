@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateOpportunityDto {
   @IsNotEmpty()
@@ -11,6 +11,6 @@ export class CreateOpportunityDto {
 
   @IsNotEmpty()
   @IsArray()
-  @IsNumber({}, { each: true })
-  readonly skillIds: number[];
+  @IsString({ each: true })
+  readonly skills: string[];
 }

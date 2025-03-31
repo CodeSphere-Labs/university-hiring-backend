@@ -48,21 +48,176 @@ async function main() {
     });
   }
 
-  const group1 = await prisma.group.upsert({
-    where: { name: 'ПИ-101' },
-    update: {},
-    create: {
-      name: 'ПИ-101',
-    },
-  });
+  const groups = await Promise.all([
+    prisma.group.upsert({
+      where: { name: 'ПИ-101' },
+      update: {},
+      create: { name: 'ПИ-101' },
+    }),
+    prisma.group.upsert({
+      where: { name: 'ИВТ-201' },
+      update: {},
+      create: { name: 'ИВТ-201' },
+    }),
+    prisma.group.upsert({
+      where: { name: 'ПИ-102' },
+      update: {},
+      create: { name: 'ПИ-102' },
+    }),
+    prisma.group.upsert({
+      where: { name: 'ИВТ-202' },
+      update: {},
+      create: { name: 'ИВТ-202' },
+    }),
+    prisma.group.upsert({
+      where: { name: 'ПИ-103' },
+      update: {},
+      create: { name: 'ПИ-103' },
+    }),
+  ]);
 
-  const group2 = await prisma.group.upsert({
-    where: { name: 'ИВТ-201' },
-    update: {},
-    create: {
-      name: 'ИВТ-201',
-    },
-  });
+  const students = await Promise.all([
+    prisma.user.upsert({
+      where: { email: 'student1@example.com' },
+      update: {},
+      create: {
+        firstName: 'Алексей',
+        lastName: 'Петров',
+        patronymic: 'Иванович',
+        email: 'student1@example.com',
+        passwordHash: PASSWORD_HASH,
+        role: 'STUDENT',
+        organizationId: university.id,
+        telegramLink: '@alex_petrov',
+        vkLink: 'vk.com/alex_petrov',
+        aboutMe: 'Увлекаюсь веб-разработкой и машинным обучением',
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'student2@example.com' },
+      update: {},
+      create: {
+        firstName: 'Мария',
+        lastName: 'Сидорова',
+        patronymic: 'Александровна',
+        email: 'student2@example.com',
+        passwordHash: PASSWORD_HASH,
+        role: 'STUDENT',
+        organizationId: university.id,
+        telegramLink: '@maria_sidorova',
+        vkLink: 'vk.com/maria_sidorova',
+        aboutMe: 'Интересуюсь мобильной разработкой',
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'student3@example.com' },
+      update: {},
+      create: {
+        firstName: 'Дмитрий',
+        lastName: 'Иванов',
+        patronymic: 'Петрович',
+        email: 'student3@example.com',
+        passwordHash: PASSWORD_HASH,
+        role: 'STUDENT',
+        organizationId: university.id,
+        telegramLink: '@dmitry_ivanov',
+        vkLink: 'vk.com/dmitry_ivanov',
+        aboutMe: 'Разработка игр и графических приложений',
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'student4@example.com' },
+      update: {},
+      create: {
+        firstName: 'Елена',
+        lastName: 'Козлова',
+        patronymic: 'Сергеевна',
+        email: 'student4@example.com',
+        passwordHash: PASSWORD_HASH,
+        role: 'STUDENT',
+        organizationId: university.id,
+        telegramLink: '@elena_kozlova',
+        vkLink: 'vk.com/elena_kozlova',
+        aboutMe: 'Backend разработка и базы данных',
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: 'student5@example.com' },
+      update: {},
+      create: {
+        firstName: 'Андрей',
+        lastName: 'Смирнов',
+        patronymic: 'Дмитриевич',
+        email: 'student5@example.com',
+        passwordHash: PASSWORD_HASH,
+        role: 'STUDENT',
+        organizationId: university.id,
+        telegramLink: '@andrey_smirnov',
+        vkLink: 'vk.com/andrey_smirnov',
+        aboutMe: 'Full-stack разработка и DevOps',
+      },
+    }),
+  ]);
+
+  // Создаем 50 студентов для группы ПИ-101
+  const pi101Students = await Promise.all(
+    Array.from({ length: 50 }, (_, i) => {
+      const firstName = `Студент${i + 1}`;
+      const lastName = `Фамилия${i + 1}`;
+      const patronymic = `Отчество${i + 1}`;
+      return prisma.user.upsert({
+        where: { email: `student${i + 1}@example.com` },
+        update: {},
+        create: {
+          firstName,
+          lastName,
+          patronymic,
+          email: `student${i + 1}@example.com`,
+          passwordHash: PASSWORD_HASH,
+          role: 'STUDENT',
+          organizationId: university.id,
+          telegramLink: `@student${i + 1}`,
+          vkLink: `vk.com/student${i + 1}`,
+          aboutMe: `Описание студента ${i + 1}`,
+        },
+      });
+    }),
+  );
+
+  // Создаем профили для всех студентов ПИ-101
+  for (const student of pi101Students) {
+    const skillsCount = Math.floor(Math.random() * 5) + 3; // 3-7 навыков
+    const projectsCount = Math.floor(Math.random() * 3) + 1; // 1-3 проекта
+
+    const projects = [];
+    for (let i = 0; i < projectsCount; i++) {
+      projects.push({
+        id: `project_${student.id}_${i}`,
+        name: `Проект ${i + 1} студента ${student.firstName}`,
+        description: `Описание проекта ${i + 1}`,
+        githubUrl: `https://github.com/${student.firstName.toLowerCase()}/project-${i + 1}`,
+        websiteUrl: `https://project-${i + 1}.example.com`,
+        technologies: ['TypeScript', 'React', 'Node.js', 'PostgreSQL'],
+      });
+    }
+
+    await prisma.studentProfile.upsert({
+      where: { userId: student.id },
+      update: {},
+      create: {
+        userId: student.id,
+        groupId: groups[0].id, // ПИ-101
+        resume: `https://example.com/resume-${student.id}.pdf`,
+        githubLink: `https://github.com/${student.firstName.toLowerCase()}`,
+        projects,
+        skills: {
+          connect: Array.from({ length: skillsCount }, (_, i) => ({
+            id: i + 1,
+          })),
+        },
+      },
+    });
+  }
 
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
@@ -106,83 +261,11 @@ async function main() {
     },
   });
 
-  const studentWithProfile = await prisma.user.upsert({
-    where: { email: 'student1@example.com' },
-    update: {},
-    create: {
-      firstName: 'Alex',
-      lastName: 'Johnson',
-      patronymic: 'William',
-      email: 'student1@example.com',
-      passwordHash: PASSWORD_HASH,
-      role: 'STUDENT',
-      organizationId: university.id,
-      telegramLink: '@alex_johnson',
-      vkLink: 'vk.com/alex_johnson',
-      aboutMe: 'Активный студент, интересуюсь ML и веб-разработкой',
-    },
-  });
-
-  await prisma.studentProfile.upsert({
-    where: { userId: studentWithProfile.id },
-    update: {},
-    create: {
-      userId: studentWithProfile.id,
-      groupId: group1.id,
-      resume: 'https://example.com/resume.pdf',
-      githubLink: 'https://github.com/alex-johnson',
-      projects: [
-        {
-          id: 'ai',
-          name: 'AI Chat Bot',
-          description: 'Чат-бот на основе машинного обучения',
-          githubUrl: 'https://github.com/alex-johnson/ai-chat-bot',
-          websiteUrl: 'https://ai-chat-bot.example.com',
-          technologies: ['Python', 'TensorFlow', 'React', 'Node.js'],
-        },
-        {
-          id: 'web',
-          name: 'Web Portfolio',
-          description: 'Персональный сайт-портфолио',
-          githubUrl: 'https://github.com/alex-johnson/portfolio',
-          websiteUrl: 'https://portfolio.example.com',
-          technologies: ['React', 'TypeScript', 'Tailwind CSS'],
-        },
-      ],
-      skills: {
-        connect: [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }],
-      },
-    },
-  });
-
-  const studentWithoutProfile = await prisma.user.upsert({
-    where: { email: 'student2@example.com' },
-    update: {},
-    create: {
-      firstName: 'Maria',
-      lastName: 'Garcia',
-      patronymic: 'Elena',
-      email: 'student2@example.com',
-      passwordHash: PASSWORD_HASH,
-      role: 'STUDENT',
-      organizationId: university.id,
-    },
-  });
-
-  await prisma.studentProfile.upsert({
-    where: { userId: studentWithoutProfile.id },
-    update: {},
-    create: {
-      userId: studentWithoutProfile.id,
-      groupId: group2.id,
-    },
-  });
-
   await prisma.organization.update({
     where: { id: company.id },
     data: {
       favoriteStudents: {
-        connect: { id: studentWithProfile.id },
+        connect: { id: students[0].id },
       },
     },
   });

@@ -4,41 +4,15 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { map } from 'rxjs';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class AllGroupsInterceptor implements NestInterceptor {
-  intercept(_: ExecutionContext, next: CallHandler) {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
       map((data) => {
-        try {
-          if (!Array.isArray(data)) {
-            return {
-              ...data,
-              students: data.students?.map((student) => ({
-                id: student.user.id,
-                firstName: student.user.firstName,
-                lastName: student.user.lastName,
-                patronymic: student.user.patronymic,
-                email: student.user.email,
-                avatarUrl: student.user.avatarUrl,
-                aboutMe: student.user.aboutMe,
-                telegramLink: student.user.telegramLink,
-                vkLink: student.user.vkLink,
-                role: student.user.role,
-                createdAt: student.user.createdAt,
-                updatedAt: student.user.updatedAt,
-                organization: student.user.organization,
-                studentProfile: {
-                  ...student.user.studentProfile,
-                  skills: student.user.studentProfile.skills.map(
-                    (skill) => skill.name,
-                  ),
-                },
-              })),
-            };
-          }
-
+        if (Array.isArray(data)) {
           return data.map((group) => ({
             ...group,
             students: group.students.map((student) => ({
@@ -57,14 +31,41 @@ export class AllGroupsInterceptor implements NestInterceptor {
               organization: student.user.organization,
               studentProfile: {
                 ...student.user.studentProfile,
-                skills: student.user.studentProfile.skills.map(
+                skills: student.user.studentProfile.skills?.map(
                   (skill) => skill.name,
                 ),
               },
             })),
           }));
-        } catch {
-          return data;
+        } else {
+          return {
+            data: {
+              id: data.id,
+              name: data.name,
+              students: data.students?.map((student) => ({
+                id: student.user.id,
+                firstName: student.user.firstName,
+                lastName: student.user.lastName,
+                patronymic: student.user.patronymic,
+                email: student.user.email,
+                avatarUrl: student.user.avatarUrl,
+                aboutMe: student.user.aboutMe,
+                telegramLink: student.user.telegramLink,
+                vkLink: student.user.vkLink,
+                role: student.user.role,
+                createdAt: student.user.createdAt,
+                updatedAt: student.user.updatedAt,
+                organization: student.user.organization,
+                studentProfile: {
+                  ...student.user.studentProfile,
+                  skills: student.user.studentProfile.skills?.map(
+                    (skill) => skill.name,
+                  ),
+                },
+              })),
+            },
+            meta: data.meta,
+          };
         }
       }),
     );

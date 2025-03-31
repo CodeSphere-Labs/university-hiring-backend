@@ -36,12 +36,35 @@ export class GroupsService {
     });
   }
 
-  async getById(id: number, withStudents: boolean) {
+  async getById(
+    id: number,
+    withStudents: boolean,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+  ) {
+    const skip = (page - 1) * limit;
+
+    const whereCondition: any = { id };
+
     const group = await this.prisma.group.findUniqueOrThrow({
-      where: { id },
+      where: whereCondition,
       include: {
         ...(withStudents && {
           students: {
+            skip,
+            take: limit,
+            where: search
+              ? {
+                  user: {
+                    OR: [
+                      { firstName: { contains: search, mode: 'insensitive' } },
+                      { lastName: { contains: search, mode: 'insensitive' } },
+                      { email: { contains: search, mode: 'insensitive' } },
+                    ],
+                  },
+                }
+              : undefined,
             include: {
               user: {
                 include: {
@@ -55,11 +78,30 @@ export class GroupsService {
               },
             },
           },
+          _count: {
+            select: {
+              students: true,
+            },
+          },
         }),
       },
     });
 
-    console.log(group.students[0]);
+    if (withStudents) {
+      const total = group._count.students;
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        ...group,
+        students: group.students,
+        meta: {
+          page,
+          limit,
+          totalItems: total,
+          totalPages,
+        },
+      };
+    }
 
     return group;
   }

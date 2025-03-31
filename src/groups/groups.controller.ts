@@ -37,8 +37,11 @@ export class GroupsController {
     @Param('id', ParseIntPipe) id: number,
     @Query('withStudents', new DefaultValuePipe(false), ParseBoolPipe)
     withStudents: boolean,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
   ) {
-    return this.groupsService.getById(id, withStudents);
+    return this.groupsService.getById(id, withStudents, page, limit, search);
   }
 
   @Post()

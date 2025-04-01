@@ -361,7 +361,8 @@ export class InvitationService {
       throw new HttpException(ErrorCodes['FORBIDDEN'], HttpStatus.FORBIDDEN);
     }
 
-    const skip = (page - 1) * limit;
+    const skip = search ? 0 : (page - 1) * limit;
+    const take = search ? undefined : limit;
 
     const whereCondition: any = {};
 
@@ -393,7 +394,7 @@ export class InvitationService {
     const invitations = await this.prisma.invitation.findMany({
       where: whereCondition,
       skip,
-      take: limit,
+      take,
       orderBy: {
         updatedAt: 'desc',
       },
@@ -423,8 +424,8 @@ export class InvitationService {
     return {
       data: invitations,
       meta: {
-        page,
-        limit,
+        page: search ? 1 : page,
+        limit: search ? total : limit,
         totalItems: total,
         totalPages,
       },

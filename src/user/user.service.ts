@@ -37,17 +37,28 @@ export class UserService {
   }
 
   async getById(id: number) {
-    return await this.prisma.user.findUniqueOrThrow({
+    const user = await this.prisma.user.findUniqueOrThrow({
       where: { id },
       include: {
         studentProfile: {
           include: {
             group: true,
+            skills: true,
           },
         },
         organization: true,
       },
     });
+
+    return {
+      ...user,
+      ...(user.role === 'STUDENT' && {
+        studentProfile: {
+          ...user.studentProfile,
+          skills: user.studentProfile?.skills?.map((skill) => skill.name) || [],
+        },
+      }),
+    };
   }
 
   async updateUser(user: UserInterceptorResponse, userBody: UpdateUserDto) {

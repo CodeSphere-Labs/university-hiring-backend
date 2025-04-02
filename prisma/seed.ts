@@ -285,6 +285,69 @@ async function main() {
     },
   });
 
+  // Создаем 50 тестовых стажировок
+  const opportunityTitles = [
+    'Frontend Developer Intern',
+    'Backend Developer Intern',
+    'Full Stack Developer Intern',
+    'DevOps Engineer Intern',
+    'QA Engineer Intern',
+    'Mobile Developer Intern',
+    'Data Science Intern',
+    'Machine Learning Engineer Intern',
+    'UI/UX Designer Intern',
+    'Product Manager Intern',
+    'Business Analyst Intern',
+    'Security Engineer Intern',
+    'Cloud Engineer Intern',
+    'Blockchain Developer Intern',
+    'Game Developer Intern',
+    'AR/VR Developer Intern',
+    'Embedded Systems Engineer Intern',
+    'System Administrator Intern',
+    'Network Engineer Intern',
+    'Database Administrator Intern',
+  ];
+
+  const opportunityDescriptions = [
+    'Присоединяйтесь к нашей команде разработчиков и получите ценный опыт работы над реальными проектами.',
+    'Мы ищем талантливых студентов для участия в разработке инновационных решений.',
+    'Стажировка в одной из ведущих технологических компаний с возможностью дальнейшего трудоустройства.',
+    'Работа над интересными проектами под руководством опытных наставников.',
+    'Возможность применить свои знания на практике и развить профессиональные навыки.',
+    'Участие в разработке продуктов, которыми пользуются миллионы людей.',
+    'Работа в современном офисе с дружной командой единомышленников.',
+    'Гибкий график и возможность совмещать с учебой.',
+    'Конкурентная оплата и социальный пакет для стажеров.',
+    'Возможность проявить себя и реализовать свои идеи.',
+  ];
+
+  const companies = [company, companyForAdmin];
+
+  for (let i = 0; i < 50; i++) {
+    const title =
+      opportunityTitles[Math.floor(Math.random() * opportunityTitles.length)];
+    const description =
+      opportunityDescriptions[
+        Math.floor(Math.random() * opportunityDescriptions.length)
+      ];
+    const company = companies[Math.floor(Math.random() * companies.length)];
+    const skillsCount = Math.floor(Math.random() * 3) + 2; // 2-4 навыка
+
+    await prisma.opportunity.create({
+      data: {
+        title: `${title} ${i + 1}`,
+        description: `${description} ${i + 1}`,
+        organizationId: company.id,
+        requiredSkills: {
+          connect: Array.from({ length: skillsCount }, (_, i) => ({
+            id: i + 1,
+          })),
+        },
+      },
+    });
+  }
+
   const uniStaff = await prisma.user.findUnique({
     where: { email: 'staff@university.com' },
   });
@@ -292,8 +355,6 @@ async function main() {
   const companyStaff = await prisma.user.findUnique({
     where: { email: 'hr@company.com' },
   });
-
-  console.log('Создание тестовых приглашений...');
 
   const now = new Date();
 
@@ -389,8 +450,6 @@ async function main() {
     data: invitationData,
     skipDuplicates: true,
   });
-
-  console.log(`Создано ${invitationData.length} тестовых приглашений`);
 }
 
 main()

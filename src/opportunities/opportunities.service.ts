@@ -13,11 +13,34 @@ import { CreateOpportunityDto } from 'src/opportunities/dto/create.opportunity.d
 export class OpportunitiesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(withResponses: boolean) {
-    return await this.prisma.opportunity.findMany({
+  async findAll(
+    withResponses: boolean,
+    page: number = 1,
+    limit: number = 10,
+    search?: string,
+  ) {
+    const skip = search ? 0 : (page - 1) * limit;
+    const take = search ? undefined : limit;
+
+    const whereCondition: any = {};
+
+    if (search) {
+      whereCondition.OR = [
+        { title: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const opportunities = await this.prisma.opportunity.findMany({
+      where: whereCondition,
+      skip,
+      take,
+      orderBy: {
+        createdAt: 'desc',
+      },
       include: {
-        requiredSkills: true,
         organization: true,
+        requiredSkills: true,
         ...(withResponses && {
           responses: {
             include: {
@@ -25,7 +48,11 @@ export class OpportunitiesService {
                 include: {
                   user: {
                     include: {
-                      organization: true,
+                      studentProfile: {
+                        include: {
+                          skills: true,
+                        },
+                      },
                     },
                   },
                 },
@@ -35,6 +62,22 @@ export class OpportunitiesService {
         }),
       },
     });
+
+    const total = await this.prisma.opportunity.count({
+      where: whereCondition,
+    });
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: opportunities,
+      meta: {
+        page: search ? 1 : page,
+        limit: search ? total : limit,
+        totalItems: total,
+        totalPages,
+      },
+    };
   }
 
   async create(dto: CreateOpportunityDto, user: UserInterceptorResponse) {

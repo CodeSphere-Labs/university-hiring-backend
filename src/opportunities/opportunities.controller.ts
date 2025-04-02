@@ -31,8 +31,11 @@ export class OpportunitiesController {
   async all(
     @Query('withResponses', new DefaultValuePipe(false), ParseBoolPipe)
     withResponses: boolean,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('search') search?: string,
   ) {
-    return this.opportunityService.findAll(withResponses);
+    return this.opportunityService.findAll(withResponses, page, limit, search);
   }
 
   @Post()

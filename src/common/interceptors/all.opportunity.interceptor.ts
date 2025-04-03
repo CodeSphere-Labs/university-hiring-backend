@@ -10,37 +10,44 @@ import { map } from 'rxjs';
 export class AllOpportunityInterceptor implements NestInterceptor {
   intercept(_: ExecutionContext, next: CallHandler) {
     return next.handle().pipe(
-      map((data: OpportunitiesResponse[]) => {
+      map((data: OpportunitiesResponse) => {
         try {
-          const newData = Array.isArray(data) ? data : [data];
+          const newData = Array.isArray(data.data) ? data.data : [data.data];
 
-          return newData.map((opportunity) => {
-            return {
-              ...opportunity,
-              responses: opportunity.responses.map((response) => {
-                return {
-                  id: response.id,
-                  coverLetter: response.coverLetter,
-                  student: {
-                    id: response.student.user.id,
-                    firstName: response.student.user.firstName,
-                    lastName: response.student.user.lastName,
-                    patronymic: response.student.user.patronymic,
-                    resume: response.student.resume,
-                    githubLink: response.student.githubLink,
-                    projects: response.student.projects,
-                    email: response.student.user.email,
-                    avatarUrl: response.student.user.avatarUrl,
-                    aboutMe: response.student.user.aboutMe,
-                    telegramLink: response.student.user.telegramLink,
-                    vkLink: response.student.user.vkLink,
-                    role: response.student.user.role,
-                    organization: response.student.user.organization,
-                  },
-                };
-              }),
-            };
-          });
+          return {
+            data: newData.map((opportunity) => {
+              const respondedUserIds = opportunity.responses.map(
+                (response) => response.student.user.id,
+              );
+              return {
+                ...opportunity,
+                respondedUserIds,
+                responses: opportunity.responses.map((response) => {
+                  return {
+                    id: response.id,
+                    coverLetter: response.coverLetter,
+                    student: {
+                      id: response.student.user.id,
+                      firstName: response.student.user.firstName,
+                      lastName: response.student.user.lastName,
+                      patronymic: response.student.user.patronymic,
+                      resume: response.student.resume,
+                      githubLink: response.student.githubLink,
+                      projects: response.student.projects,
+                      email: response.student.user.email,
+                      avatarUrl: response.student.user.avatarUrl,
+                      aboutMe: response.student.user.aboutMe,
+                      telegramLink: response.student.user.telegramLink,
+                      vkLink: response.student.user.vkLink,
+                      role: response.student.user.role,
+                      organization: response.student.user.organization,
+                    },
+                  };
+                }),
+              };
+            }),
+            meta: data.meta,
+          };
         } catch {
           console.error('Error transforming data', data);
           return data;
@@ -51,13 +58,22 @@ export class AllOpportunityInterceptor implements NestInterceptor {
 }
 
 interface OpportunitiesResponse {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  requiredSkills: ReqiredSkills[];
-  organization: Organization;
-  responses: Response[];
+  data: {
+    id: number;
+    title: string;
+    description: string;
+    status: string;
+    requiredSkills: ReqiredSkills[];
+    organization: Organization;
+    responses: Response[];
+    respondedUserIds: number[];
+  }[];
+  meta: {
+    page: number;
+    limit: number;
+    totalItems: number;
+    totalPages: number;
+  };
 }
 
 interface Response {

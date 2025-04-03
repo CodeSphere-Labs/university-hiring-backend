@@ -80,6 +80,7 @@ export class OpportunitiesService {
       const { responses, ...opportunityWithoutResponses } = opportunity;
       return {
         ...opportunityWithoutResponses,
+        responses,
         respondedUserIds: responses.map((response) => response.student.user.id),
       };
     });

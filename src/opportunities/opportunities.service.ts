@@ -41,6 +41,19 @@ export class OpportunitiesService {
       include: {
         organization: true,
         requiredSkills: true,
+        responses: {
+          include: {
+            student: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         ...(withResponses && {
           responses: {
             include: {
@@ -63,6 +76,14 @@ export class OpportunitiesService {
       },
     });
 
+    const opportunitiesWithRespondedUsers = opportunities.map((opportunity) => {
+      const { responses, ...opportunityWithoutResponses } = opportunity;
+      return {
+        ...opportunityWithoutResponses,
+        respondedUserIds: responses.map((response) => response.student.user.id),
+      };
+    });
+
     const total = await this.prisma.opportunity.count({
       where: whereCondition,
     });
@@ -70,7 +91,7 @@ export class OpportunitiesService {
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: opportunities,
+      data: opportunitiesWithRespondedUsers,
       meta: {
         page: search ? 1 : page,
         limit: search ? total : limit,

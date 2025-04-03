@@ -56,11 +56,15 @@ export class OpportunitiesController {
     @Param('opportunityId', ParseIntPipe) opportunityId: number,
     @Body('coverLetter') coverLetter?: string,
   ) {
-    return this.opportunityService.response(
+    const response = await this.opportunityService.response(
       opportunityId,
       request.user,
       coverLetter,
     );
+    return {
+      ...response,
+      userId: request.user.id,
+    };
   }
 
   @Get(':id')

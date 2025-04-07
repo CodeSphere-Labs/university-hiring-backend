@@ -118,6 +118,12 @@ export class InvitationService {
     return updatedUser;
   }
 
+  async checkInvitation(token: string, response: Response) {
+    await this.verifyInvitationToken(token);
+
+    response.status(HttpStatus.OK).json({ status: 'success' });
+  }
+
   async getInvitationStats(
     user: UserInterceptorResponse,
     filter: 'createdByMe' | 'all',
@@ -489,8 +495,8 @@ export class InvitationService {
 
       if (!invitation) {
         throw new HttpException(
-          ErrorCodes['INVALID_INVITATION'],
-          HttpStatus.BAD_REQUEST,
+          ErrorCodes['INVITATION_NOT_FOUND'],
+          HttpStatus.NOT_FOUND,
         );
       }
 

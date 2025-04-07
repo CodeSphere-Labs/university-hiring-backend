@@ -92,6 +92,14 @@ export class InvitationController {
     );
   }
 
+  @Get('check-invitation')
+  async checkInvitation(
+    @Query('token') token: string,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    return await this.invitationService.checkInvitation(token, response);
+  }
+
   @Patch('refresh-invitation')
   @UseInterceptors(UserInterceptor)
   @Roles(['ADMIN', 'STAFF', 'UNIVERSITY_STAFF'])

@@ -48,6 +48,17 @@ export class InvitationService {
       where: { email: invitationDto.email },
     });
 
+    const existingUser = await this.prisma.user.findFirst({
+      where: { email: invitationDto.email },
+    });
+
+    if (existingUser) {
+      throw new HttpException(
+        ErrorCodes['USER_ALREADY_EXISTS'],
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const expired =
       existingInvitation && existingInvitation.expiresAt < new Date();
 
@@ -103,7 +114,13 @@ export class InvitationService {
     const invitation = await this.verifyInvitationToken(token);
 
     const user = await this.registerUser(
-      confirmInvitationDto,
+      {
+        email: invitation.email,
+        firstName: confirmInvitationDto.firstName,
+        lastName: confirmInvitationDto.lastName,
+        patronymic: confirmInvitationDto.patronymic,
+        password: confirmInvitationDto.password,
+      },
       invitation,
       response,
     );

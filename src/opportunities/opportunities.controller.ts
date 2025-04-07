@@ -28,14 +28,25 @@ export class OpportunitiesController {
 
   @Get()
   @UseInterceptors(new AllOpportunityInterceptor())
+  @UseInterceptors(UserInterceptor)
   async all(
     @Query('withResponses', new DefaultValuePipe(false), ParseBoolPipe)
     withResponses: boolean,
+    @Query('createdByMe', new DefaultValuePipe(false), ParseBoolPipe)
+    createdByMe: boolean,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Req() request: UserInterceptorRequest,
     @Query('search') search?: string,
   ) {
-    return this.opportunityService.findAll(withResponses, page, limit, search);
+    return this.opportunityService.findAll(
+      withResponses,
+      createdByMe,
+      page,
+      limit,
+      request.user,
+      search,
+    );
   }
 
   @Post()

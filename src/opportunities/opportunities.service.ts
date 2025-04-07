@@ -15,8 +15,10 @@ export class OpportunitiesService {
 
   async findAll(
     withResponses: boolean,
+    createdByMe: boolean,
     page: number = 1,
     limit: number = 10,
+    user: UserInterceptorResponse,
     search?: string,
   ) {
     const skip = search ? 0 : (page - 1) * limit;
@@ -29,6 +31,10 @@ export class OpportunitiesService {
         { title: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
       ];
+    }
+
+    if (createdByMe) {
+      whereCondition.organizationId = user.organizationId;
     }
 
     const opportunities = await this.prisma.opportunity.findMany({

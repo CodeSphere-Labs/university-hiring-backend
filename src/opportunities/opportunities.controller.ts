@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { Roles } from 'src/common/guards/role.guard';
 import { AllOpportunityInterceptor } from 'src/common/interceptors/all.opportunity.interceptor';
+import { OpportunityInterceptor } from 'src/common/interceptors/opportunity.interceptor';
 import {
   UserInterceptor,
   UserInterceptorRequest,
@@ -79,7 +80,7 @@ export class OpportunitiesController {
   }
 
   @Get(':id')
-  @UseInterceptors(new AllOpportunityInterceptor())
+  @UseInterceptors(new OpportunityInterceptor())
   async getById(
     @Param('id', ParseIntPipe) opportunityId: number,
     @Query('withResponses', new DefaultValuePipe(false), ParseBoolPipe)

@@ -12,10 +12,8 @@ export class AllOpportunityInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data: OpportunitiesResponse) => {
         try {
-          const newData = Array.isArray(data.data) ? data.data : [data.data];
-
           return {
-            data: newData.map((opportunity) => {
+            data: data.data.map((opportunity) => {
               const respondedUserIds = opportunity.responses.map(
                 (response) => response.student.user.id,
               );
@@ -66,7 +64,6 @@ interface OpportunitiesResponse {
     requiredSkills: ReqiredSkills[];
     organization: Organization;
     responses: Response[];
-    respondedUserIds: number[];
   }[];
   meta: {
     page: number;
@@ -91,7 +88,6 @@ interface Response {
 interface Student {
   id: number;
   userId: number;
-
   firstName: string;
   lastName: string;
   patronymic: string;

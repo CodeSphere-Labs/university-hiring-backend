@@ -10,7 +10,7 @@ import { map } from 'rxjs';
 export class OpportunityInterceptor implements NestInterceptor {
   intercept(_: ExecutionContext, next: CallHandler) {
     return next.handle().pipe(
-      map((data: OpportunityResponse) => {
+      map((data: any) => {
         try {
           const respondedUserIds = data.responses.map(
             (response) => response.student.user.id,
@@ -22,14 +22,11 @@ export class OpportunityInterceptor implements NestInterceptor {
               return {
                 id: response.id,
                 coverLetter: response.coverLetter,
-                student: {
+                user: {
                   id: response.student.user.id,
                   firstName: response.student.user.firstName,
                   lastName: response.student.user.lastName,
                   patronymic: response.student.user.patronymic,
-                  resume: response.student.resume,
-                  githubLink: response.student.githubLink,
-                  projects: response.student.projects,
                   email: response.student.user.email,
                   avatarUrl: response.student.user.avatarUrl,
                   aboutMe: response.student.user.aboutMe,
@@ -37,6 +34,12 @@ export class OpportunityInterceptor implements NestInterceptor {
                   vkLink: response.student.user.vkLink,
                   role: response.student.user.role,
                   organization: response.student.user.organization,
+                  studentProfile: {
+                    ...response.student.user.studentProfile,
+                    skills: response.student.user.studentProfile.skills?.map(
+                      (skill) => skill.name,
+                    ),
+                  },
                 },
               };
             }),
@@ -48,66 +51,4 @@ export class OpportunityInterceptor implements NestInterceptor {
       }),
     );
   }
-}
-
-interface OpportunityResponse {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  requiredSkills: ReqiredSkills[];
-  organization: Organization;
-  responses: Response[];
-}
-
-interface Response {
-  id: number;
-  coverLetter: string | null;
-  student: {
-    id: number;
-    resume: string;
-    githubLink: string;
-    projects: Project[];
-    user: Student;
-  };
-}
-
-interface Student {
-  id: number;
-  userId: number;
-  firstName: string;
-  lastName: string;
-  patronymic: string;
-  email: string;
-  avatarUrl: string;
-  aboutMe: string;
-  telegramLink: string;
-  vkLink: string;
-  role: string;
-  organization: Organization;
-}
-
-interface Project {
-  name: string;
-  githubUrl: string;
-  websiteUrl: string;
-  description: string;
-  technologies: string[];
-}
-
-interface Organization {
-  id: number;
-  name: string;
-  type: string;
-  email: string;
-  logoUrl: string | null;
-  websiteUrl: string;
-  about: string;
-}
-
-interface ReqiredSkills {
-  id: number;
-  name: string;
-  category: string;
-  description: string;
 }

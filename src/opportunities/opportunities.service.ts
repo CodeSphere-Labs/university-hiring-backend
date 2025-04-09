@@ -186,6 +186,12 @@ export class OpportunitiesService {
                   user: {
                     include: {
                       organization: true,
+                      studentProfile: {
+                        include: {
+                          skills: true,
+                          group: true,
+                        },
+                      },
                     },
                   },
                 },

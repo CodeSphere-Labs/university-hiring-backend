@@ -22,7 +22,7 @@ export class OpportunityInterceptor implements NestInterceptor {
               return {
                 id: response.id,
                 coverLetter: response.coverLetter,
-                user: {
+                student: {
                   id: response.student.user.id,
                   firstName: response.student.user.firstName,
                   lastName: response.student.user.lastName,

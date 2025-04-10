@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { Roles } from 'src/common/guards/role.guard';
 import { AllOpportunityInterceptor } from 'src/common/interceptors/all.opportunity.interceptor';
-import { OpportunityInterceptor } from 'src/common/interceptors/opportunity.interceptor';
+import { OpportunityResponsesInterceptor } from 'src/common/interceptors/opportunity.responses.interceptor';
 import {
   UserInterceptor,
   UserInterceptorRequest,
@@ -80,13 +80,30 @@ export class OpportunitiesController {
   }
 
   @Get(':id')
-  @UseInterceptors(new OpportunityInterceptor())
-  async getById(
-    @Param('id', ParseIntPipe) opportunityId: number,
-    @Query('withResponses', new DefaultValuePipe(false), ParseBoolPipe)
-    withResponses: boolean,
+  async getById(@Param('id', ParseIntPipe) opportunityId: number) {
+    return this.opportunityService.getById(opportunityId);
+  }
+
+  @Get(':id/responses')
+  @UseInterceptors(new OpportunityResponsesInterceptor())
+  async getResponses(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('status', new DefaultValuePipe('waiting'))
+    status: 'waiting' | 'accepted' | 'rejected',
   ) {
-    return this.opportunityService.getById(opportunityId, withResponses);
+    return this.opportunityService.getResponses(id, page, limit, status);
+  }
+
+  @Patch(':id/responses/:responseId/status')
+  @Roles(['ADMIN', 'STAFF'])
+  async updateResponseStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('responseId', ParseIntPipe) responseId: number,
+    @Body('status') status: 'accepted' | 'rejected' | 'waiting',
+  ) {
+    return this.opportunityService.updateResponseStatus(id, responseId, status);
   }
 
   @Delete(':id')

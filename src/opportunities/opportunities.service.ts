@@ -172,34 +172,12 @@ export class OpportunitiesService {
     });
   }
 
-  async getById(opportunityId: number, withResponses: boolean) {
+  async getById(opportunityId: number) {
     const opportunity = await this.prisma.opportunity.findUniqueOrThrow({
       where: { id: opportunityId },
-      ...(withResponses && {
-        include: {
-          requiredSkills: true,
-          organization: true,
-          responses: {
-            include: {
-              student: {
-                include: {
-                  user: {
-                    include: {
-                      organization: true,
-                      studentProfile: {
-                        include: {
-                          skills: true,
-                          group: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      }),
+      include: {
+        requiredSkills: true,
+      },
     });
 
     return opportunity;
@@ -213,5 +191,113 @@ export class OpportunitiesService {
     return await this.prisma.opportunity.delete({
       where: { id: opportunityId },
     });
+  }
+
+  async getResponses(
+    opportunityId: number,
+    page: number = 1,
+    limit: number = 10,
+    status: 'waiting' | 'accepted' | 'rejected',
+  ) {
+    const skip = (page - 1) * limit;
+
+    const whereCondition: any = {
+      opportunityId,
+      status: status.toUpperCase(),
+    };
+
+    // if (search) {
+    //   whereCondition.OR = [
+    //     {
+    //       student: {
+    //         user: {
+    //           OR: [
+    //             { firstName: { contains: search, mode: 'insensitive' } },
+    //             { lastName: { contains: search, mode: 'insensitive' } },
+    //             { email: { contains: search, mode: 'insensitive' } },
+    //           ],
+    //         },
+    //       },
+    //     },
+    //   ];
+    // }
+
+    const [responses, total] = await Promise.all([
+      this.prisma.opportunityResponse.findMany({
+        skip,
+        take: limit,
+        where: whereCondition,
+        include: {
+          student: {
+            include: {
+              user: {
+                include: {
+                  organization: true,
+                  studentProfile: {
+                    include: {
+                      skills: true,
+                      group: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.opportunityResponse.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: responses,
+      meta: {
+        page,
+        limit,
+        totalItems: total,
+        totalPages,
+      },
+    };
+  }
+
+  async updateResponseStatus(
+    opportunityId: number,
+    responseId: number,
+    status: 'accepted' | 'rejected' | 'waiting',
+  ) {
+    const response = await this.prisma.opportunityResponse.update({
+      where: {
+        id: responseId,
+        opportunityId,
+      },
+      data: {
+        status: status.toUpperCase() as 'ACCEPTED' | 'REJECTED' | 'WAITING',
+      },
+      include: {
+        student: {
+          include: {
+            user: {
+              include: {
+                organization: true,
+                studentProfile: {
+                  include: {
+                    skills: true,
+                    group: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return response;
   }
 }

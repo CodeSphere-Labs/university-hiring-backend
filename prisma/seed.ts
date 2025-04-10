@@ -450,6 +450,45 @@ async function main() {
     data: invitationData,
     skipDuplicates: true,
   });
+
+  // Создаем отклики на первую вакансию
+  const firstOpportunity = await prisma.opportunity.findFirst();
+  const studentsForResponses = await prisma.studentProfile.findMany({
+    where: {
+      groupId: groups[0].id, // ПИ-101
+    },
+    take: 50,
+    include: {
+      user: true,
+    },
+  });
+
+  const responseData = studentsForResponses.map((student, index) => ({
+    opportunityId: firstOpportunity.id,
+    studentId: student.id,
+    coverLetter: `Здравствуйте! Я ${student.user.firstName} ${student.user.lastName}, студент группы ПИ-101. 
+    Я очень заинтересован в стажировке в вашей компании. У меня есть опыт работы с ${
+      ['React', 'Node.js', 'TypeScript', 'Python', 'Java', 'C++'][index % 6]
+    } и я активно изучаю новые технологии.
+    
+    Мой GitHub: ${student.githubLink}
+    Моё портфолио: ${
+      typeof student.projects === 'string'
+        ? JSON.parse(student.projects as string)
+            .map((p: { name: string }) => p.name)
+            .join(', ')
+        : (student.projects as any[]).map((p) => p.name).join(', ')
+    }
+    
+    Буду рад стать частью вашей команды!`,
+  }));
+
+  await prisma.opportunityResponse.createMany({
+    data: responseData,
+    skipDuplicates: true,
+  });
+
+  console.log(`Создано ${responseData.length} откликов на первую вакансию`);
 }
 
 main()

@@ -111,6 +111,8 @@ model OpportunityResponse {
   opportunity   Opportunity    @relation(fields: [opportunityId], references: [id])
   createdAt     DateTime       @default(now())
   coverLetter   String?       
+  status        ResponseStatus @default(WAITING)
+
 }
 
 model Skill {
@@ -146,4 +148,10 @@ enum Role {
   UNIVERSITY_STAFF
   STAFF
   STUDENT
+}
+
+enum ResponseStatus {
+  WAITING
+  ACCEPTED
+  REJECTED
 }

@@ -110,6 +110,7 @@ model OpportunityResponse {
   opportunityId Int
   opportunity   Opportunity    @relation(fields: [opportunityId], references: [id])
   createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   coverLetter   String?       
   status        ResponseStatus @default(WAITING)
 

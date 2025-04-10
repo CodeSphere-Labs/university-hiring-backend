@@ -245,7 +245,7 @@ export class OpportunitiesService {
           },
         },
         orderBy: {
-          createdAt: 'desc',
+          updatedAt: 'desc',
         },
       }),
       this.prisma.opportunityResponse.count({

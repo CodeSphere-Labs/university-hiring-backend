@@ -22,6 +22,10 @@ model Organization {
   invitations Invitation[]
   favoriteStudents User[]    @relation("FavoriteStudents")
   opportunities Opportunity[] 
+  universityId Int?
+
+  universityPractices Practice[] @relation("UniversityPractices")
+  organizationPractices Practice[] @relation("OrganizationPractices")
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -89,6 +93,7 @@ model StudentProfile {
   user          User      @relation(fields: [userId], references: [id])
   opportunityResponse OpportunityResponse[]
   skills          Skill[]         @relation("UserSkills")
+  practices      Practice[]
 }
 
 model Opportunity {
@@ -136,8 +141,26 @@ model Group {
   updatedAt     DateTime         @updatedAt
 
   Invitation Invitation[]
+  practices    Practice[]
 }
 
+model Practice {
+  id          Int       @id @default(autoincrement())
+  name        String
+  groupId     Int
+  group       Group     @relation(fields: [groupId], references: [id])
+  students    StudentProfile[]
+  address     String
+  notes       String?
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  universityId Int
+  university   Organization @relation("UniversityPractices", fields: [universityId], references: [id])
+  organizationId Int
+  organization Organization @relation("OrganizationPractices", fields: [organizationId], references: [id])
+}
 
 enum OrganizationType {
   COMPANY

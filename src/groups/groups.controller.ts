@@ -61,4 +61,10 @@ export class GroupsController {
   async delete(@Param('id', ParseIntPipe) id: number) {
     return this.groupsService.delete(id);
   }
+
+  @Get(':id/students')
+  @UseInterceptors(new AllGroupsInterceptor())
+  async getStudentsByGroupId(@Param('id', ParseIntPipe) id: number) {
+    return this.groupsService.getStudentsByGroupId(id);
+  }
 }

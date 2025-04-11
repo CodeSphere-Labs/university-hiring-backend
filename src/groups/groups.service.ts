@@ -189,4 +189,47 @@ export class GroupsService {
       },
     };
   }
+
+  async getStudentsByGroupId(groupId: number) {
+    const group = await this.prisma.group.findUniqueOrThrow({
+      where: { id: groupId },
+      include: {
+        students: {
+          include: {
+            user: {
+              include: {
+                organization: true,
+                studentProfile: {
+                  include: {
+                    skills: true,
+                    group: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return group.students.map((student) => ({
+      id: student.user.id,
+      firstName: student.user.firstName,
+      lastName: student.user.lastName,
+      patronymic: student.user.patronymic,
+      email: student.user.email,
+      avatarUrl: student.user.avatarUrl,
+      aboutMe: student.user.aboutMe,
+      telegramLink: student.user.telegramLink,
+      vkLink: student.user.vkLink,
+      role: student.user.role,
+      createdAt: student.user.createdAt,
+      updatedAt: student.user.updatedAt,
+      organization: student.user.organization,
+      studentProfile: {
+        ...student.user.studentProfile,
+        skills: student.user.studentProfile.skills?.map((skill) => skill.name),
+      },
+    }));
+  }
 }

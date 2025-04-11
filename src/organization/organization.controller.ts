@@ -33,8 +33,9 @@ export class OrganizationController {
   async all(
     @Query('withFavorites', new DefaultValuePipe(false), ParseBoolPipe)
     withFavorites: boolean,
+    @Query('type') type?: 'company' | 'university',
   ) {
-    return this.organizationService.findAll(withFavorites);
+    return this.organizationService.findAll(withFavorites, type);
   }
 
   @Get(':id')

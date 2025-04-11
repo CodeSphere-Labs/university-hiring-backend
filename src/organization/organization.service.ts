@@ -8,13 +8,19 @@ import {
 import { CreateOrganizationDto } from './dto/CreateOrganization.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { ErrorCodes } from 'src/common/enums/error-codes';
-
+import { OrganizationType } from '@prisma/client';
 @Injectable()
 export class OrganizationService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(withFavorites: boolean = false) {
+  async findAll(
+    withFavorites: boolean = false,
+    type?: 'company' | 'university',
+  ) {
     return await this.prisma.organization.findMany({
+      where: type
+        ? { type: type.toUpperCase() as OrganizationType }
+        : undefined,
       ...(withFavorites && {
         include: {
           favoriteStudents: {

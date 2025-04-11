@@ -10,7 +10,7 @@ import { ConfigModule } from '@nestjs/config';
 import { configuration } from 'src/config';
 import { SkillsModule } from './skills/skills.module';
 import { StudentModule } from './student/student.module';
-
+import { PracticesModule } from './practices/practices.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,6 +27,7 @@ import { StudentModule } from './student/student.module';
     EmailModule,
     SkillsModule,
     StudentModule,
+    PracticesModule,
   ],
 })
 export class AppModule {}

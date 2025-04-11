@@ -15,7 +15,7 @@ export class AllGroupsInterceptor implements NestInterceptor {
         if (Array.isArray(data)) {
           return data.map((group) => ({
             ...group,
-            students: group.students.map((student) => ({
+            students: group.students?.map((student) => ({
               id: student.user.id,
               firstName: student.user.firstName,
               lastName: student.user.lastName,

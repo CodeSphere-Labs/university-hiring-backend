@@ -206,4 +206,15 @@ export class AuthService {
       data: { refreshToken: hashedRefreshToken },
     });
   }
+
+  async validateToken(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('jwt.access'),
+      });
+      return payload;
+    } catch {
+      throw new UnauthorizedException('Invalid token');
+    }
+  }
 }

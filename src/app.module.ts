@@ -11,6 +11,9 @@ import { configuration } from 'src/config';
 import { SkillsModule } from './skills/skills.module';
 import { StudentModule } from './student/student.module';
 import { PracticesModule } from './practices/practices.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -28,6 +31,13 @@ import { PracticesModule } from './practices/practices.module';
     SkillsModule,
     StudentModule,
     PracticesModule,
+  ],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
   ],
 })
 export class AppModule {}

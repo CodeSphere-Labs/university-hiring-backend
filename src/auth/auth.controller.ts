@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { Public } from './decorators/public.decorator';
 
 import type { Response } from 'express';
 import { SignInDto } from './dto/signin.dto';
@@ -21,6 +22,7 @@ import { ResponseUserDto } from 'src/common/baseDto/responseUser.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('sign-in')
   @UseInterceptors(new TransformDataInterceptor(ResponseUserDto))
   async signIn(

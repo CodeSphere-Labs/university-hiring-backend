@@ -11,6 +11,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/database/prisma.service';
 import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
 
 export type UserInterceptorResponse = Omit<
   User,
@@ -28,12 +30,22 @@ export class UserInterceptor implements NestInterceptor {
     private readonly jwtService: JwtService,
     private readonly prisma: PrismaService,
     private configService: ConfigService,
+    private reflector: Reflector,
   ) {}
 
   async intercept(
     context: ExecutionContext,
     next: CallHandler,
   ): Promise<Observable<any>> {
+    const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublic) {
+      return next.handle();
+    }
+
     const request = context.switchToHttp().getRequest<UserInterceptorRequest>();
     const accessToken = request.cookies?.accessToken;
 
@@ -62,9 +74,11 @@ export class UserInterceptor implements NestInterceptor {
           },
         },
       });
+
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
+
       const {
         passwordHash,
         refreshToken,
@@ -83,7 +97,8 @@ export class UserInterceptor implements NestInterceptor {
       };
 
       return next.handle();
-    } catch {
+    } catch (error) {
+      console.log(error);
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

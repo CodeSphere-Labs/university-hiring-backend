@@ -3,10 +3,9 @@ import {
   Post,
   Body,
   Get,
-  Param,
-  ParseIntPipe,
   UseInterceptors,
   Req,
+  Query,
 } from '@nestjs/common';
 import { PracticesService } from './practices.service';
 import { CreatePracticeDto } from './dto/create.practice.dto';
@@ -15,6 +14,7 @@ import {
   UserInterceptor,
   UserInterceptorRequest,
 } from 'src/common/interceptors/user.interceptor';
+import { AllPracticesInterceptor } from '../common/interceptors/all.practices.interceptor';
 
 @Controller('practices')
 export class PracticesController {
@@ -30,17 +30,21 @@ export class PracticesController {
     return this.practicesService.create(createPracticeDto, request.user);
   }
 
-  @Get('university/:universityId')
-  @Roles(['ADMIN', 'UNIVERSITY_STAFF'])
-  findByUniversity(@Param('universityId', ParseIntPipe) universityId: number) {
-    return this.practicesService.findByUniversity(universityId);
-  }
-
-  @Get('organization/:organizationId')
-  @Roles(['ADMIN', 'STAFF'])
-  findByOrganization(
-    @Param('organizationId', ParseIntPipe) organizationId: number,
+  @Get()
+  @Roles(['ADMIN', 'UNIVERSITY_STAFF', 'STAFF', 'STUDENT'])
+  @UseInterceptors(UserInterceptor, new AllPracticesInterceptor())
+  findAll(
+    @Req() request: UserInterceptorRequest,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('filter') filter?: 'all' | 'createdByMe',
+    @Query('search') search?: string,
   ) {
-    return this.practicesService.findByOrganization(organizationId);
+    return this.practicesService.findPractices(request.user, {
+      page,
+      limit,
+      filter,
+      search,
+    });
   }
 }

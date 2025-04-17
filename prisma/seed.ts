@@ -233,7 +233,7 @@ async function main() {
     },
   });
 
-  await prisma.user.upsert({
+  const staffUser = await prisma.user.upsert({
     where: { email: 'staff@university.com' },
     update: {},
     create: {
@@ -347,6 +347,58 @@ async function main() {
       },
     });
   }
+
+  // Создаем практики
+  await Promise.all([
+    prisma.practice.create({
+      data: {
+        name: 'Летняя практика в IT-компании',
+        groupId: groups[0].id,
+        address: 'ул. Ленина, 1',
+        notes: 'Требуется знание JavaScript и React',
+        startDate: new Date('2024-06-01'),
+        endDate: new Date('2024-08-31'),
+        universityId: university.id,
+        organizationId: company.id,
+        createdById: staffUser.id,
+        students: {
+          connect: [{ id: students[0].id }, { id: students[1].id }],
+        },
+      },
+    }),
+    prisma.practice.create({
+      data: {
+        name: 'Зимняя практика в банке',
+        groupId: groups[1].id,
+        address: 'ул. Пушкина, 10',
+        notes: 'Требуется знание SQL и Python',
+        startDate: new Date('2024-12-01'),
+        endDate: new Date('2025-02-28'),
+        universityId: university.id,
+        organizationId: company.id,
+        createdById: staffUser.id,
+        students: {
+          connect: [{ id: students[2].id }, { id: students[3].id }],
+        },
+      },
+    }),
+    prisma.practice.create({
+      data: {
+        name: 'Весенняя практика в стартапе',
+        groupId: groups[2].id,
+        address: 'ул. Гагарина, 5',
+        notes: 'Требуется знание TypeScript и Node.js',
+        startDate: new Date('2024-03-01'),
+        endDate: new Date('2024-05-31'),
+        universityId: university.id,
+        organizationId: company.id,
+        createdById: staffUser.id,
+        students: {
+          connect: [{ id: students[4].id }, { id: students[0].id }],
+        },
+      },
+    }),
+  ]);
 
   const uniStaff = await prisma.user.findUnique({
     where: { email: 'staff@university.com' },

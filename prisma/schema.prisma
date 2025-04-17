@@ -55,6 +55,7 @@ model User {
   favoredBy       Organization[] @relation("FavoriteStudents")
 
   Invitation Invitation[]
+  Practices Practice[]
 }
 
 model Invitation {
@@ -160,6 +161,9 @@ model Practice {
   university   Organization @relation("UniversityPractices", fields: [universityId], references: [id])
   organizationId Int
   organization Organization @relation("OrganizationPractices", fields: [organizationId], references: [id])
+
+  createdById     Int       
+  createdBy       User      @relation(fields: [createdById], references: [id]) 
 }
 
 enum OrganizationType {

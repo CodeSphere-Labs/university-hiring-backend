@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePracticeDto } from './dto/create.practice.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { UserInterceptorResponse } from 'src/common/interceptors/user.interceptor';
@@ -97,6 +97,21 @@ export class PracticesService {
     ]);
 
     return this.formatResponse(practices, total, pageNumber, limitNumber);
+  }
+
+  async findPracticeById(id: number) {
+    const practice = await this.prisma.practice.findUniqueOrThrow({
+      where: {
+        id,
+      },
+      include: this.getPracticeInclude(),
+    });
+
+    if (!practice) {
+      throw new NotFoundException('Практика не найдена');
+    }
+
+    return practice;
   }
 
   private getBaseWhereCondition(user: UserInterceptorResponse, filter: string) {

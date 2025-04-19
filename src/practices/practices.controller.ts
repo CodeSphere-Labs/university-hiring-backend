@@ -6,6 +6,8 @@ import {
   UseInterceptors,
   Req,
   Query,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PracticesService } from './practices.service';
 import { CreatePracticeDto } from './dto/create.practice.dto';
@@ -46,5 +48,12 @@ export class PracticesController {
       filter,
       search,
     });
+  }
+
+  @Get(':id')
+  @Roles(['ADMIN', 'UNIVERSITY_STAFF', 'STAFF', 'STUDENT'])
+  @UseInterceptors(UserInterceptor, new AllPracticesInterceptor())
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.practicesService.findPracticeById(id);
   }
 }

@@ -23,6 +23,10 @@ export class CreatePracticeDto {
   @IsNotEmpty()
   organizationId: number;
 
+  @IsInt()
+  @IsNotEmpty()
+  supervisorId: number;
+
   @IsArray()
   @IsInt({ each: true })
   @IsNotEmpty()

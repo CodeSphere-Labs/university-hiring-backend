@@ -48,6 +48,9 @@ export const ErrorCodes = {
   ALREADY_RESPONDED: 'already_responded',
   RESPONSE_NOT_FOUND: 'response_not_found',
 
+  // Practice related
+  PRACTICE_NOT_FOUND: 'practice_not_found',
+
   // Project related
   PROJECT_NOT_FOUND: 'project_not_found',
   PROJECT_ALREADY_EXISTS: 'project_already_exists',

@@ -13,6 +13,7 @@ import { User } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { IS_PUBLIC_KEY } from 'src/auth/decorators/public.decorator';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 export type UserInterceptorResponse = Omit<
   User,
@@ -50,7 +51,7 @@ export class UserInterceptor implements NestInterceptor {
     const accessToken = request.cookies?.accessToken;
 
     if (!accessToken) {
-      throw new UnauthorizedException('Access token is missing');
+      throw new UnauthorizedException(ErrorCodes['INVALID_TOKEN']);
     }
 
     try {
@@ -59,7 +60,7 @@ export class UserInterceptor implements NestInterceptor {
       });
 
       if (!decodedToken.sub) {
-        throw new UnauthorizedException('Invalid token');
+        throw new UnauthorizedException(ErrorCodes['INVALID_TOKEN']);
       }
 
       const user = await this.prisma.user.findUniqueOrThrow({
@@ -76,7 +77,7 @@ export class UserInterceptor implements NestInterceptor {
       });
 
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException(ErrorCodes['USER_NOT_FOUND']);
       }
 
       const {
@@ -98,8 +99,7 @@ export class UserInterceptor implements NestInterceptor {
 
       return next.handle();
     } catch (error) {
-      console.log(error);
-      throw new UnauthorizedException('Invalid or expired token');
+      throw new UnauthorizedException(ErrorCodes['INVALID_TOKEN']);
     }
   }
 }

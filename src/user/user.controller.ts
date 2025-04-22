@@ -66,4 +66,11 @@ export class UserController {
   ) {
     return await this.userService.delete(request.user, id);
   }
+
+  @Get('organization/:organizationId')
+  async findUsersByOrganization(
+    @Param('organizationId', ParseIntPipe) organizationId: number,
+  ) {
+    return this.userService.findUsersByOrganization(organizationId);
+  }
 }

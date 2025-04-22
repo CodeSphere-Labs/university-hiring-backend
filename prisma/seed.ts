@@ -348,7 +348,43 @@ async function main() {
     });
   }
 
-  // Создаем практики
+  // Создаем сотрудников организаций для руководства практиками
+  const practiceSupervisors = await Promise.all([
+    prisma.user.create({
+      data: {
+        firstName: 'Иван',
+        lastName: 'Петров',
+        patronymic: 'Сергеевич',
+        email: 'supervisor1@company.com',
+        passwordHash: PASSWORD_HASH,
+        role: 'STAFF',
+        organizationId: company.id,
+      },
+    }),
+    prisma.user.create({
+      data: {
+        firstName: 'Анна',
+        lastName: 'Сидорова',
+        patronymic: 'Ивановна',
+        email: 'supervisor2@company.com',
+        passwordHash: PASSWORD_HASH,
+        role: 'STAFF',
+        organizationId: company.id,
+      },
+    }),
+  ]);
+
+  // Получаем студентов с данными пользователей
+  const studentsWithUsers = await Promise.all(
+    students.map((student) =>
+      prisma.studentProfile.findUnique({
+        where: { id: student.id },
+        include: { user: true },
+      }),
+    ),
+  );
+
+  // Обновляем создание практик
   await Promise.all([
     prisma.practice.create({
       data: {
@@ -361,8 +397,29 @@ async function main() {
         universityId: university.id,
         organizationId: company.id,
         createdById: staffUser.id,
+        supervisorId: practiceSupervisors[0].id,
         students: {
-          connect: [{ id: students[0].id }, { id: students[1].id }],
+          connect: [
+            { id: studentsWithUsers[0].id },
+            { id: studentsWithUsers[1].id },
+          ],
+        },
+        chat: {
+          create: {
+            messages: {
+              create: [
+                {
+                  userId: practiceSupervisors[0].id,
+                  content:
+                    'Добро пожаловать на практику! Завтра в 10:00 состоится вводное собрание.',
+                },
+                {
+                  userId: studentsWithUsers[0].user.id,
+                  content: 'Спасибо! Буду на собрании.',
+                },
+              ],
+            },
+          },
         },
       },
     }),
@@ -377,8 +434,30 @@ async function main() {
         universityId: university.id,
         organizationId: company.id,
         createdById: staffUser.id,
+        supervisorId: practiceSupervisors[1].id,
         students: {
-          connect: [{ id: students[2].id }, { id: students[3].id }],
+          connect: [
+            { id: studentsWithUsers[2].id },
+            { id: studentsWithUsers[3].id },
+          ],
+        },
+        chat: {
+          create: {
+            messages: {
+              create: [
+                {
+                  userId: practiceSupervisors[1].id,
+                  content:
+                    'Приветствуем вас на зимней практике! Пожалуйста, ознакомьтесь с программой.',
+                },
+                {
+                  userId: studentsWithUsers[2].user.id,
+                  content:
+                    'Спасибо, уже изучил программу. Есть несколько вопросов.',
+                },
+              ],
+            },
+          },
         },
       },
     }),
@@ -393,8 +472,29 @@ async function main() {
         universityId: university.id,
         organizationId: company.id,
         createdById: staffUser.id,
+        supervisorId: practiceSupervisors[0].id,
         students: {
-          connect: [{ id: students[4].id }, { id: students[0].id }],
+          connect: [
+            { id: studentsWithUsers[4].id },
+            { id: studentsWithUsers[0].id },
+          ],
+        },
+        chat: {
+          create: {
+            messages: {
+              create: [
+                {
+                  userId: practiceSupervisors[0].id,
+                  content:
+                    'Добро пожаловать на весеннюю практику! На этой неделе мы начнем с изучения основ.',
+                },
+                {
+                  userId: studentsWithUsers[4].user.id,
+                  content: 'Отлично! Буду готовиться к началу.',
+                },
+              ],
+            },
+          },
         },
       },
     }),

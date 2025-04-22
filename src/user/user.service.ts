@@ -148,4 +148,39 @@ export class UserService {
 
     return await this.prisma.user.delete({ where: { id } });
   }
+
+  async findUsersByOrganization(organizationId: number) {
+    const users = await this.prisma.user.findMany({
+      where: {
+        organizationId,
+      },
+      include: {
+        organization: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return users.map((user) => ({
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      patronymic: user.patronymic,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+      aboutMe: user.aboutMe,
+      role: user.role,
+      createdAt: user.createdAt,
+      organization: {
+        id: user.organization.id,
+        name: user.organization.name,
+        type: user.organization.type,
+        email: user.organization.email,
+        logoUrl: user.organization.logoUrl,
+        websiteUrl: user.organization.websiteUrl,
+        about: user.organization.about,
+      },
+    }));
+  }
 }

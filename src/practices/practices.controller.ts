@@ -39,7 +39,7 @@ export class PracticesController {
     @Req() request: UserInterceptorRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('filter') filter?: 'all' | 'createdByMe',
+    @Query('filter') filter?: 'all' | 'createdByMe' | 'assignedToMe',
     @Query('search') search?: string,
   ) {
     return this.practicesService.findPractices(request.user, {

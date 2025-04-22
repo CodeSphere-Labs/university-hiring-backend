@@ -3,11 +3,12 @@ import { CreatePracticeDto } from './dto/create.practice.dto';
 import { PrismaService } from 'src/database/prisma.service';
 import { UserInterceptorResponse } from 'src/common/interceptors/user.interceptor';
 import { Prisma } from '@prisma/client';
+import { ErrorCodes } from 'src/common/enums/error-codes';
 
 interface FindPracticesOptions {
   page?: string;
   limit?: string;
-  filter?: 'all' | 'createdByMe';
+  filter?: 'all' | 'createdByMe' | 'assignedToMe';
   search?: string;
 }
 
@@ -108,7 +109,7 @@ export class PracticesService {
     });
 
     if (!practice) {
-      throw new NotFoundException('Практика не найдена');
+      throw new NotFoundException(ErrorCodes['PRACTICE_NOT_FOUND']);
     }
 
     return practice;
@@ -130,8 +131,10 @@ export class PracticesService {
         ? { universityId: user.organizationId }
         : { organizationId: user.organizationId };
 
-    const filterBasedWhere =
-      filter === 'createdByMe' ? { createdById: user.id } : {};
+    const filterBasedWhere = {
+      ...(filter === 'createdByMe' && { createdById: user.id }),
+      ...(filter === 'assignedToMe' && { supervisorId: user.id }),
+    };
 
     return {
       ...roleBasedWhere,
@@ -144,6 +147,20 @@ export class PracticesService {
       group: true,
       university: true,
       organization: true,
+      supervisor: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          patronymic: true,
+          email: true,
+          avatarUrl: true,
+          aboutMe: true,
+          telegramLink: true,
+          vkLink: true,
+          role: true,
+        },
+      },
       students: {
         include: {
           user: {

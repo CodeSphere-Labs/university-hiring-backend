@@ -11,7 +11,6 @@ import { Server, Socket } from 'socket.io';
 import { PracticeChatService } from '../practice-chat.service';
 import { CreatePracticeChatMessageDto } from '../dto/create-practice-chat-message.dto';
 import { AuthService } from 'src/auth/auth.service';
-import { User } from '@prisma/client';
 
 @WebSocketGateway({
   namespace: 'practice-chat',
@@ -84,10 +83,6 @@ export class PracticeChatGateway
       parseInt(practiceId),
     );
 
-    this.logger.debug('messages', {
-      messages,
-    });
-
     return messages;
   }
 
@@ -96,14 +91,34 @@ export class PracticeChatGateway
     client: any,
     data: { practiceId: string; message: CreatePracticeChatMessageDto },
   ) {
-    const user = client.user as User;
-    const message = await this.chatService.createMessage(
-      parseInt(data.practiceId),
-      user.id,
-      data.message,
-    );
+    try {
+      const cookies = client.handshake.headers.cookie;
 
-    this.server.to(`practice:${data.practiceId}`).emit('newMessage', message);
-    return message;
+      if (!cookies) {
+        client.disconnect();
+        return;
+      }
+
+      const accessToken = cookies
+        .split('; ')
+        .find((cookie: string) => cookie.startsWith('access'))
+        ?.split('=')[1];
+
+      const payload = await this.authService.validateToken(accessToken);
+
+      client.data.userId = payload.sub;
+      client.data.role = payload.role;
+
+      const message = await this.chatService.createMessage(
+        parseInt(data.practiceId),
+        client.data.userId,
+        data.message,
+      );
+
+      this.server.to(`practice:${data.practiceId}`).emit('newMessage', message);
+      return message;
+    } catch (error) {
+      this.logger.error('Error sending message:', error);
+    }
   }
 }

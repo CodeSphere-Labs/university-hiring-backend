@@ -50,6 +50,9 @@ export class UpdateUserDto {
   readonly githubLink?: string;
 
   @IsOptional()
+  readonly group?: string;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => PetProjectDto)

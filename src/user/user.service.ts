@@ -62,7 +62,9 @@ export class UserService {
   }
 
   async updateUser(user: UserInterceptorResponse, userBody: UpdateUserDto) {
-    const { resume, githubLink, projects, skills, ...userUpdates } = userBody;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { resume, githubLink, projects, skills, group, ...userUpdates } =
+      userBody;
 
     if (user.role === 'STUDENT') {
       let skillIds: { id: number }[] = [];

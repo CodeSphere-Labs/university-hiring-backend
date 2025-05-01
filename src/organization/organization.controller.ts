@@ -87,7 +87,7 @@ export class OrganizationController {
   }
 
   @Post()
-  @Roles(['ADMIN'])
+  @Roles(['ADMIN', 'UNIVERSITY_STAFF'])
   async registration(@Body() registrationDto: CreateOrganizationDto) {
     return this.organizationService.registration(registrationDto);
   }

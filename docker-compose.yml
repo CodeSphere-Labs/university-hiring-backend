@@ -1,13 +1,72 @@
-version: '3'
+version: '3.7'
+
 services:
-  db:
-    image: postgres
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    stdin_open: true
+    tty: true
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@postgres_db:5432/${DATABASE_NAME}
+    networks:
+      - prisma-network
+
+  postgres_db:
+    image: postgres:15
+    hostname: postgres_db
+    container_name: postgres_db
     restart: always
     environment:
       - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
       - POSTGRES_DB=${DATABASE_NAME}
       - POSTGRES_USER=${DATABASE_USERNAME}
-    volumes:
-      - ./pgdata:/var/lib/postgresql/data
     ports:
-      - '5438:5432'
+      - '5432:5432'
+    networks:
+      - prisma-network
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}']
+      interval: 5s
+      timeout: 2s
+      retries: 20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: postgres -c listen_addresses='*'
+    logging:
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+  prisma-studio:
+    image: node:lts-alpine3.17
+    working_dir: /usr/src/app
+    volumes:
+      - .:/usr/src/app
+    command: npx prisma studio --port 5555 --browser none
+    ports:
+      - '5555:5555'
+    environment:
+      - DATABASE_URL=postgresql://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@postgres_db:5432/${DATABASE_NAME}
+    networks:
+      - prisma-network
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      server:
+        condition: service_started
+
+networks:
+  prisma-network:
+    name: prisma-network
+
+volumes:
+  postgres_data:

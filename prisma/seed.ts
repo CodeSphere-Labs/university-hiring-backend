@@ -191,13 +191,26 @@ async function main() {
 
     const projects = [];
     for (let i = 0; i < projectsCount; i++) {
+      const technologies = [
+        ['TypeScript', 'React', 'Node.js', 'PostgreSQL'],
+        ['Python', 'Django', 'PostgreSQL', 'Docker'],
+        ['Java', 'Spring Boot', 'MySQL', 'Maven'],
+        ['C++', 'Qt', 'SQLite', 'CMake'],
+        ['JavaScript', 'Vue.js', 'Express', 'MongoDB'],
+        ['Python', 'Flask', 'Redis', 'Celery'],
+        ['TypeScript', 'Angular', 'NestJS', 'MongoDB'],
+        ['Go', 'Gin', 'PostgreSQL', 'Docker'],
+        ['Rust', 'Actix', 'PostgreSQL', 'Diesel'],
+        ['PHP', 'Laravel', 'MySQL', 'Composer'],
+      ][i % 10];
+
       projects.push({
         id: `project_${student.id}_${i}`,
         name: `Проект ${i + 1} студента ${student.firstName}`,
         description: `Описание проекта ${i + 1}`,
         githubUrl: `https://github.com/${student.firstName.toLowerCase()}/project-${i + 1}`,
         websiteUrl: `https://project-${i + 1}.example.com`,
-        technologies: ['TypeScript', 'React', 'Node.js', 'PostgreSQL'],
+        technologies,
       });
     }
 
@@ -212,7 +225,7 @@ async function main() {
         projects,
         skills: {
           connect: Array.from({ length: skillsCount }, (_, i) => ({
-            id: i + 1,
+            id: ((student.id + i) % 25) + 1, // Используем 25 уникальных навыков
           })),
         },
       },
@@ -340,8 +353,8 @@ async function main() {
         description: `${description} ${i + 1}`,
         organizationId: company.id,
         requiredSkills: {
-          connect: Array.from({ length: skillsCount }, (_, i) => ({
-            id: i + 1,
+          connect: Array.from({ length: skillsCount }, (_, j) => ({
+            id: ((i + j) % 25) + 1, // Используем 25 уникальных навыков
           })),
         },
       },

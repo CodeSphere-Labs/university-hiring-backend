@@ -28,6 +28,7 @@ import {
   InvitationDto,
   ResponseInvitationDto,
 } from './dto/ResponseInvitationDto';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('invitations')
 export class InvitationController {
@@ -78,6 +79,7 @@ export class InvitationController {
     );
   }
 
+  @Public()
   @Post('confirm-invitation')
   @UseInterceptors(new TransformDataInterceptor(ResponseUserDto))
   async confirmRegisration(
@@ -92,6 +94,7 @@ export class InvitationController {
     );
   }
 
+  @Public()
   @Get('check-invitation')
   async checkInvitation(
     @Query('token') token: string,

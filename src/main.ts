@@ -12,6 +12,10 @@ async function bootstrap() {
   app.enableCors({
     origin: true,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Range', 'X-Total-Count'],
+    preflightContinue: false,
   });
 
   const { httpAdapter } = app.get(HttpAdapterHost);

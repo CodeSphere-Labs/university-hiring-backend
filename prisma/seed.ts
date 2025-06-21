@@ -6,6 +6,13 @@ const PASSWORD_HASH =
   '$2b$10$pRMWOouBcx7YE2FqffF7KucxvTxxs9/iuITDPjlU5QiO1AVZg3YMa';
 
 async function main() {
+  // Проверяем, есть ли уже данные в базе
+  const existingUser = await prisma.user.findFirst();
+  if (existingUser) {
+    console.log('Данные уже существуют в базе. Пропускаем seed.');
+    return;
+  }
+
   const university = await prisma.organization.upsert({
     where: { email: 'university@example.com' },
     update: {},

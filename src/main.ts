@@ -10,10 +10,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://diplom-frontend-gz49dd-1a7835-176-109-107-66.traefik.me',
-    ],
+    origin: true,
     credentials: true,
   });
 

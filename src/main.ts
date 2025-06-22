@@ -13,11 +13,22 @@ async function bootstrap() {
     origin: [
       'http://localhost:5173',
       'http://localhost:3000',
+      'http://localhost:3030',
       'http://localhost:4173',
       'https://diplom-frontend-gz49dd-46da40-176-109-107-66.traefik.me',
+      'http://192.168.1.101:3030',
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS', 'HEAD'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Cookie',
+      'Set-Cookie',
+    ],
+    exposedHeaders: ['Set-Cookie'],
+    maxAge: 600,
   });
 
   const { httpAdapter } = app.get(HttpAdapterHost);

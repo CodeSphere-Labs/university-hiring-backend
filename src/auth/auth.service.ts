@@ -156,14 +156,14 @@ export class AuthService {
   ): void {
     response.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: this.configService.get<boolean>('cookie.secure'),
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
     });
 
     response.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: this.configService.get<boolean>('cookie.secure'),
-      sameSite: 'lax',
+      secure: true,
+      sameSite: 'none',
     });
   }
 

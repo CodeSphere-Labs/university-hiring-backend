@@ -7,9 +7,9 @@ const PASSWORD_HASH =
 
 async function main() {
   // Проверяем, есть ли уже данные в базе
-  const existingUser = await prisma.user.findFirst();
-  console.log(existingUser);
-  if (existingUser) {
+  const existingOrganization = await prisma.organization.findFirst();
+  console.log(existingOrganization);
+  if (existingOrganization) {
     console.log('Данные уже существуют в базе. Пропускаем seed.');
     return;
   }
